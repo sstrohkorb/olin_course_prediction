@@ -1,3 +1,6 @@
+# Sarah is ID# 721
+# Berit is ID# 572
+
 class Student:
 
   def __init__(self, ID, gender, list_of_course_offerings, graduating_class, major):
