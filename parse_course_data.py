@@ -45,9 +45,20 @@ with open('../anonymizeddata_UpToFall2013.csv','rb') as f:
     	if academic_status == 'Academic Status Code':
     		continue
 
+        # keys = course #
+        # values = equivalent course #
+        equivalent_courses = {}
 
+        # Populating equivalent courses with the AHS/AHSE stuff
 
-    	courses[course_number] = courses.get(course_number, Course(course_title, course_number))
+        # Populating equivalent courses with the Speical Topics stuff
+
+        # Populating equivalent courses with other random stuff
+
+        if course_number in equivalent_courses:
+            course_number = equivalent_courses[course_number]
+
+        courses[course_number] = courses.get(course_number, Course(course_title, course_number))
     	course = courses[course_number]
     	professors[professor_name] = professors.get(professor_name, Professor(professor_name))
     	# (self, semester, section_title, section_no, Course)
