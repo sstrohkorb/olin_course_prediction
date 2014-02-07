@@ -52,6 +52,11 @@ with open('../anonymizeddata_UpToFall2013.csv','rb') as f:
         # Populating equivalent courses with the AHS/AHSE stuff
 
         # Populating equivalent courses with the Speical Topics stuff
+        special_topics = ['AHSE2199','AHSE3199','AHSE3599','AHSE4199','ENGR1199','ENGR2199','ENGR2299','ENGR2599','ENGR2699','ENGR3199','ENGR3299','ENGR3399','ENGR3499','ENGR3599','ENGR3699','ENGR3899','MTH2188','MTH2199','MTH3199','SCI2099','SCI2199','SCI2299','SCI2399','SCI3199']
+        for st in special_topics:
+        	for letter in 'ABC':
+        		equivalent_courses[st+letter] = st
+
 
         # Populating equivalent courses with other random stuff
 
@@ -82,7 +87,7 @@ for course in courses:
     course_list.sort()
 
 for (a,b) in course_list:
-    print a + "\t : " + b
+	print a + "\t : " + b
 
 
 
