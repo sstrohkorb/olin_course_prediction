@@ -50,6 +50,17 @@ with open('../anonymizeddata_UpToFall2013.csv','rb') as f:
         equivalent_courses = {}
 
         # Populating equivalent courses with the AHS/AHSE stuff
+        
+        if course_number == 'AHS1110':
+            course_number = 'AHSE1100'
+        if course_number == 'AHS1111':
+            course_number = 'AHSE2131'
+        if course_number == 'AHS1140':
+            course_number = 'AHSE2120'
+
+        if 'AHS' in course_number and 'AHSE' not in course_number:
+            course_number = course_number[:3] + 'E' + course_number[3:]
+
 
         # Populating equivalent courses with the Speical Topics stuff
         special_topics = ['AHSE2199','AHSE3199','AHSE3599','AHSE4199','ENGR1199','ENGR2199','ENGR2299','ENGR2599','ENGR2699','ENGR3199','ENGR3299','ENGR3399','ENGR3499','ENGR3599','ENGR3699','ENGR3899','MTH2188','MTH2199','MTH3199','SCI2099','SCI2199','SCI2299','SCI2399','SCI3199']
