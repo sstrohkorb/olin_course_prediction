@@ -24,7 +24,7 @@ students = {} #id:Student
 courses = {} #course_number:Course
 professors = {}#name:Professor
 
-with open('anonymizeddata_UpToFall2013.csv','rb') as f:
+with open('../anonymizeddata_UpToFall2013.csv','rb') as f:
     contents = csv.reader(f)
     matrix = list()
     for row in contents:
@@ -45,6 +45,8 @@ with open('anonymizeddata_UpToFall2013.csv','rb') as f:
     	if academic_status == 'Academic Status Code':
     		continue
 
+
+
     	courses[course_number] = courses.get(course_number, Course(course_title, course_number))
     	course = courses[course_number]
     	professors[professor_name] = professors.get(professor_name, Professor(professor_name))
@@ -62,3 +64,17 @@ with open('anonymizeddata_UpToFall2013.csv','rb') as f:
 
     	if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
     		students[stud_id].major = major
+
+course_list = []
+for course in courses:
+    course_list.append((courses[course].course_number, courses[course].title))
+    course_list.sort()
+
+for (a,b) in course_list:
+    print a + "\t : " + b
+
+
+
+
+
+
