@@ -1,7 +1,8 @@
 class Course_Offering: 
   
-  def __init__(self, semester, section_title, section_no, Course):
+  def __init__(self, semester, student_year, section_title, section_no, Course):
     self.semester = semester
+    self.student_year = student_year #FF, FR, SO, JR, SR
     self.section_title = section_title
     self.section_no = section_no
     self.professor = None

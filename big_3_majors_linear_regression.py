@@ -16,7 +16,13 @@ def make_training_data(x_vector, y_vector, test_size):
 
   return [x_train, y_train, x_test, y_test]
 
-def create_course_enrollment_data(students, courses, professors, desired_course):
+def create_course_enrollment_data(students, courses, professors, desired_course, desired_semester):
+  semesters = ['FF', 'FR', 'SO', 'JR', 'SR']
+  for i in range(len(semesters)):
+    if semesters[i] == desired_semester:
+      acceptable_semesters = semesters[:i]
+      break
+
   course_list = []
   for course in courses:
     course_list.append(courses[course].course_number)
@@ -34,7 +40,10 @@ def create_course_enrollment_data(students, courses, professors, desired_course)
       x_vector[course_dict[course_no]] = 1
       if course_no == desired_course:
         x_vector[course_dict[course_no]] = 0
-        y_value = 1
+        if course_offering.student_year == desired_semester:
+          y_value = 1
+      elif course_offering.student_year not in acceptable_semesters:
+        x_vector[course_dict[course_no]] = 0
 
     all_x_vectors.append(x_vector)
     all_y_values.append(y_value)
@@ -66,12 +75,15 @@ def test_logistic(logistic, x_test, y_test):
 
 course_list = ['ENGR3420', 'ENGR2250', 'ENGR2510', 'ENGR3320', 'MTH3120', 'SCI2320', 'ENGR3370', 'AHSE1122', 'SCI2199', 'ENGR3380']
 course_names = ['AnalDig', 'UOCD', 'SoftDes', 'MechSolids', 'PDEs', 'OChem', 'Controls', 'Wired', 'Relativity', 'DFM']
+
 for course, course_name in zip(course_list, course_names):
-  [x_vector, y_vector] = create_course_enrollment_data(students, courses, professors, course)
+  [x_vector, y_vector] = create_course_enrollment_data(students, courses, professors, course, 'JR')
 
   test_results = []
-  for i in range(100):
+  for i in range(50):
     [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, 10)
     test_results.append(test_logistic(logistic, x_test, y_test))
 
   print '%s: %s - %f' %(course, course_name, sum(test_results)/len(test_results))
+
+  # print logistic.get_params(deep=True)
