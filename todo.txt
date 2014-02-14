@@ -1,0 +1,8 @@
+TODO: 
+- compare with how many students would take the course (prediction using ML with an improverished feature space), reduce number of features (cut out course history, knew whether if they had taken that specific course before)
+- somehow include the information on whether they had taken the course before or not (discule those students)
+- different measures of accuracy (very rare/popular classes, hart to interpret results)
+    - area under the ROC curve
+- confidence intervals for the weights of the related courses (not standard deviation, confidence in the mean, or some statistic)
+- tuning 'C' in the linear regression input
+- does it include a bias term? - accounts for very popular/unpopular classes regardless of course history

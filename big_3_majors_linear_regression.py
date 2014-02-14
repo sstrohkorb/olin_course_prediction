@@ -37,7 +37,9 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
     for course_offering in students[student_id].list_of_course_offerings:
       course_no = course_offering.course.course_number
       x_vector[course_dict[course_no]] = 1
-      if course_no == desired_course:
+      if course_offering.course.total_number_of_students < 20:
+        x_vector[course_dict[course_no]] = 0
+      elif course_no == desired_course:
         x_vector[course_dict[course_no]] = 0
         if course_offering.student_year == desired_semester:
           y_value = 1
@@ -100,9 +102,9 @@ for course in courses:
 #course_names = ['AnalDig', 'UOCD', 'SoftDes', 'MechSolids', 'PDEs', 'OChem', 'Controls', 'Relativity', 'DFM']
 #course_semester = ['JR', 'SO', 'SO', 'SO', 'JR', 'SO', 'SR', 'SO', 'SR']
 
-course_list = ['ENGR3420', 'ENGR3380', 'ENGR2330', 'ENGR3370', 'ENGR3210', 'ENGR3220', 'SCI1210']
-course_names = ['AnalDig', 'DFM', 'MechProto', 'Controls', 'Sustainable Design', 'HFID', 'ModBio']
-course_semester = ['JR', 'SR', 'JR', 'SR', 'JR', 'JR', 'SR']
+course_list = ['ENGR3420', 'ENGR3380', 'ENGR2330', 'ENGR3370', 'ENGR3210', 'ENGR3220', 'SCI1210', 'ENGR3392']
+course_names = ['AnalDig', 'DFM', 'MechProto', 'Controls', 'Sustainable Design', 'HFID', 'ModBio', 'Robo2']
+course_semester = ['JR', 'SR', 'JR', 'SR', 'JR', 'JR', 'SR', 'JR']
 
 for course, course_name, semester in zip(course_list, course_names, course_semester):
   [prediction_strength, description] = prediction_strength_for_a_course(course, course_name, semester, 50, all_courses_list)

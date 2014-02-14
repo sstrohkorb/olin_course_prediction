@@ -79,6 +79,7 @@ def get_course_data(filename):
 
             courses[course_number] = courses.get(course_number, Course(course_title, course_number))
             course = courses[course_number]
+            course.total_number_of_students += 1
             professors[professor_name] = professors.get(professor_name, Professor(professor_name))
             # (self, semester, section_title, section_no, Course)
             course_offering = Course_Offering(course_semester, year, section_title, section_no, course)
