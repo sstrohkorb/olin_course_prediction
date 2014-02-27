@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 
 semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
 
+# TODO: Make it so that you can get history up to a specific point, see if a Freshman is likely to
+#       wait to take Mod Bio Senior 2nd
 
 def make_training_data(x_vector, y_vector, test_size):
   """ Takes as input all of the x values in a list and the y values in a list and then designates
@@ -62,7 +64,10 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   return baseline_prediction_strength
 
 
-
+# TODO: eliminate the people who didn't make it to that particular semester
+# TODO: disclude people who have taken the class from the training data
+# TODO: add major into the x_values, state assumptions being made (switching majors with the
+#       engineering concentration), and choose the majors we want to include based on #
 def create_course_enrollment_data(students, courses, professors, desired_course, desired_semester):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input. 
@@ -193,7 +198,7 @@ def prediction_strength_for_a_course(course_number, course_name, course_semester
   #test_results = []
   ROC_results = []
   for i in range(number_of_iterations):
-    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, 40)
+    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, 400)
     #test_results.append(test_logistic_binary(logistic, x_test, y_test))
     ROC_results.append(compute_ROC_for_logistic(logistic, x_test, y_test))
 
