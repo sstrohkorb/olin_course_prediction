@@ -17,7 +17,7 @@ def make_training_data(x_vector, y_vector, test_size):
   return [x_train, y_train, x_test, y_test]
 
 def create_course_enrollment_data(students, courses, professors, desired_course, desired_semester):
-  semesters = ['FF', 'FR', 'SO', 'JR', 'SR']
+  semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
   for i in range(len(semesters)):
     if semesters[i] == desired_semester:
       acceptable_semesters = semesters[:i]
@@ -146,7 +146,7 @@ for course in courses:
 
 course_list = ['AHSE1100', 'ENGR3420', 'ENGR3380', 'ENGR2330', 'ENGR3370', 'ENGR3210', 'ENGR3220', 'SCI1210', 'ENGR3392', 'ENGR2510']
 course_names = ['HistofTech', 'AnalDig', 'DFM', 'MechProto', 'Controls', 'Sustainable Design', 'HFID', 'ModBio', 'Robo2', 'SoftDes']
-course_semester = ['FF', 'JR', 'SR', 'JR', 'SR', 'JR', 'JR', 'SR', 'JR', 'FR']
+course_semester = ['FF', 'JR2', 'SR2', 'JR2', 'SR2', 'JR1', 'JR1', 'SR2', 'JR2', 'FR']
 
 for course, course_name, semester in zip(course_list, course_names, course_semester):
   description = prediction_strength_for_a_course(course, course_name, semester, 50, all_courses_list)

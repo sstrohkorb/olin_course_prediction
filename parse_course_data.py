@@ -46,6 +46,14 @@ def get_course_data(filename):
             if academic_status == 'Academic Status Code':
                 continue
 
+            
+            # Combine the course_semester and year into one meaningful variable that describes
+            # what the student's standing is at the time they take a course offering
+            # options: FF, FR, SO1, SO2, JR1, JR2, SR1, SR2
+            if year == 'SO' or year == 'JR' or year == 'SR':
+                if 'Fall' in course_semester: year += '1'
+                elif 'Spring' in course_semester: year += '2' 
+
             # keys = course #
             # values = equivalent course #
             equivalent_courses = {}
