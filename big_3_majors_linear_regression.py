@@ -33,20 +33,29 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   total_not_taken_course_before = 0
   num_who_took_course_previously = 0
   num_who_took_course_during_desired_semester = 0
+  student_made_it_to_desired_semester = 0
 
   for student_id in students:
+    # make sure that the student made it to the desired semester 
     for course_offering in students[student_id].list_of_course_offerings:
-      course_no = course_offering.course.course_number
-      if course_no == desired_course:
-        if course_offering.student_year in acceptable_semesters:
-          num_who_took_course_previously += 1
-        if course_offering.student_year == desired_semester:
-          num_who_took_course_during_desired_semester += 1
+      if course_offering.student_year == desired_semester:
+        student_made_it_to_desired_semester += 1
+        break
+    # then determine the rest
+    if student_made_it_to_desired_semester: 
+      total_not_taken_course_before += 1
+      for course_offering in students[student_id].list_of_course_offerings:
+        course_no = course_offering.course.course_number
+        if course_no == desired_course:
+          if course_offering.student_year in acceptable_semesters:
+            num_who_took_course_previously += 1
+          if course_offering.student_year == desired_semester:
+            num_who_took_course_during_desired_semester += 1
 
-  total_not_taken_course_before = len(students) - num_who_took_course_previously
+  total_not_taken_course_before = total_not_taken_course_before - num_who_took_course_previously
 
   if total_not_taken_course_before == 0:
-    baseline_prediction_strength = 0.5
+    baseline_prediction_strength = 0
   else: 
     baseline_prediction_strength = float(num_who_took_course_during_desired_semester)/float(total_not_taken_course_before)
   
