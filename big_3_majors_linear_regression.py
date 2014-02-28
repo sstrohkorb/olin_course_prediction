@@ -74,10 +74,12 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
       all_x_vectors represents the inputs to the linear regression model
       all_y_values represents the outputs to the linear regression model
   """
+
   for i in range(len(semesters)):
     if semesters[i] == desired_semester:
       acceptable_semesters = semesters[:i]
       break
+
 
   course_list = []
   for course in courses:
@@ -89,8 +91,14 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
   all_y_values = []
 
   for student_id in students:
+    if students[student_id].final_semester in acceptable_semesters:
+      # student did not make it to desired_semester- discard student
+      continue
+
     x_vector = [0]*len(course_list)
     y_value = 0
+
+    drop_student = False
 
     for course_offering in students[student_id].list_of_course_offerings:
       course_no = course_offering.course.course_number
@@ -109,6 +117,12 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
       # (not including the 'future' information in our calculations)
       elif course_offering.student_year not in acceptable_semesters:
         x_vector[course_dict[course_no]] = 0
+
+      elif course_no == desired_course and course_offering.student_year in acceptable_semesters:
+        drop_student = True 
+
+    if drop_student:
+      continue
 
     all_x_vectors.append(x_vector)
     all_y_values.append(y_value)
@@ -198,7 +212,7 @@ def prediction_strength_for_a_course(course_number, course_name, course_semester
   #test_results = []
   ROC_results = []
   for i in range(number_of_iterations):
-    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, 400)
+    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, int(len(x_vector)/2))
     #test_results.append(test_logistic_binary(logistic, x_test, y_test))
     ROC_results.append(compute_ROC_for_logistic(logistic, x_test, y_test))
 

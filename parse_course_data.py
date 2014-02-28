@@ -52,7 +52,9 @@ def get_course_data(filename):
             # options: FF, FR, SO1, SO2, JR1, JR2, SR1, SR2
             if year == 'SO' or year == 'JR' or year == 'SR':
                 if 'Fall' in course_semester: year += '1'
-                elif 'Spring' in course_semester: year += '2' 
+                elif 'Spring' in course_semester: year += '2'
+            elif year == 'TF':
+                year = 'FF'
 
             # keys = course #
             # values = equivalent course #
@@ -103,6 +105,9 @@ def get_course_data(filename):
 
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
+    
+    for s in students:
+        students[s].set_final_semester()
 
     return [students, courses, professors]
 
