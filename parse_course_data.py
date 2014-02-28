@@ -69,6 +69,10 @@ def get_course_data(filename):
             if course_number == 'AHS1140':
                 course_number = 'AHSE2120'
 
+            # Combining the mod bio courses into one
+            if course_number == 'FND2710':
+                course_number = 'SCI1210'
+
             if 'AHS' in course_number and 'AHSE' not in course_number:
                 course_number = course_number[:3] + 'E' + course_number[3:]
 
