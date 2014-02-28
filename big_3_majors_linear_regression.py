@@ -68,17 +68,18 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
 # TODO: disclude people who have taken the class from the training data
 # TODO: add major into the x_values, state assumptions being made (switching majors with the
 #       engineering concentration), and choose the majors we want to include based on #
-def create_course_enrollment_data(students, courses, professors, desired_course, desired_semester):
+def create_course_enrollment_data(students, courses, professors, desired_course, current_semester, desired_semester):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input. 
       all_x_vectors represents the inputs to the linear regression model
       all_y_values represents the outputs to the linear regression model
   """
-
+  past_semesters = []
   for i in range(len(semesters)):
     if semesters[i] == desired_semester:
       acceptable_semesters = semesters[:i]
-      break
+    if semesters[i] == current_semester:
+      past_semesters = semesters[:i+1]
 
 
   course_list = []
@@ -115,10 +116,11 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
 
       # if the course is in a semester beyond what we're considering, set the y value to 0
       # (not including the 'future' information in our calculations)
-      elif course_offering.student_year not in acceptable_semesters:
+      elif course_offering.student_year not in past_semesters:
         x_vector[course_dict[course_no]] = 0
 
-      elif course_no == desired_course and course_offering.student_year in acceptable_semesters:
+      # if student has already taken class
+      elif course_no == desired_course and course_offering.student_year in past_semesters:
         drop_student = True 
 
     if drop_student:
@@ -203,12 +205,12 @@ def determine_highest_weighted_courses(logistic, all_courses_list, number_of_cou
   sorted_highly_weighted_courses = sorted(zip(logistic.coef_[0], all_courses_list), key=lambda x:abs(x[0]), reverse=True)
   return sorted_highly_weighted_courses[:number_of_courses]
 
-def prediction_strength_for_a_course(course_number, course_name, course_semester, number_of_iterations, all_courses_list):
+def prediction_strength_for_a_course(course_number, course_name, current_semester, course_semester, number_of_iterations, all_courses_list):
   """ Determine prediction strength for a course based on the area under the ROC curve and also
       determine what the highested weighted courses are for a given course 
   """
-  [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course, semester)
-  frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, semester)
+  [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course_number, current_semester, course_semester)
+  frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course_number, course_semester)
   #test_results = []
   ROC_results = []
   for i in range(number_of_iterations):
@@ -245,10 +247,11 @@ if __name__ == "__main__":
   course_list = ['AHSE1100', 'ENGR3420', 'ENGR3380', 'ENGR2330', 'ENGR3370', 'ENGR3210', 'ENGR3220', 'SCI1210', 'ENGR3392', 'ENGR2510']
   course_names = ['HistofTech', 'AnalDig', 'DFM', 'MechProto', 'Controls', 'Sustainable Design', 'HFID', 'ModBio', 'Robo2', 'SoftDes']
   course_semester = ['FF', 'JR2', 'SR2', 'JR2', 'SR2', 'JR1', 'JR1', 'SR2', 'JR2', 'FR']
+  current_semesters = ['', 'JR1', 'SR1', 'JR1', 'SR1', 'SO2', 'SO2', 'SR1', 'JR1', 'FF']
 
-  for course, course_name, semester in zip(course_list, course_names, course_semester):
-    [our_algorithm_str, baseline_str, description] = prediction_strength_for_a_course(course, course_name, semester, 50, all_courses_list)
-    print '%s: %s' %(course_name, semester)
+  for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
+    [our_algorithm_str, baseline_str, description] = prediction_strength_for_a_course(course, course_name, current_semester, desired_semester, 50, all_courses_list)
+    print '%s: %s %s' %(course_name, current_semester, desired_semester)
     print our_algorithm_str
     print baseline_str
     print description
