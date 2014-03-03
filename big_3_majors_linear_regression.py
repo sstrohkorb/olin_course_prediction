@@ -4,11 +4,9 @@ import numpy as np
 from sklearn import datasets
 from sklearn import linear_model
 import matplotlib.pyplot as plt
+from random import *
 
 semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
-
-# TODO: Make it so that you can get history up to a specific point, see if a Freshman is likely to
-#       wait to take Mod Bio Senior 2nd
 
 def make_training_data(x_vector, y_vector, test_size):
   """ Takes as input all of the x values in a list and the y values in a list and then designates
@@ -23,15 +21,17 @@ def make_training_data(x_vector, y_vector, test_size):
 
   return [x_train, y_train, x_test, y_test]
 
-def freuqency_based_prediction_strength(students, courses, professors, desired_course, desired_semester):
+def freuqency_based_prediction_strength(students, courses, professors, desired_course, current_semester, desired_semester):
   """ Determines a baseline prediction strength based on how many students have taken the course 
       in that semester as to provide a comparison for how good our model actually is
   """
   for i in range(len(semesters)):
     if semesters[i] == desired_semester:
       acceptable_semesters = semesters[:i]
-      break
+    if semesters[i] == current_semester:
+      past_semesters = semesters[:i+1]
 
+  total_eligible_to_take_course = 0
   total_not_taken_course_before = 0
   num_who_took_course_previously = 0
   num_who_took_course_during_desired_semester = 0
@@ -45,27 +45,36 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
         break
     # then determine the rest
     if student_made_it_to_desired_semester: 
-      total_not_taken_course_before += 1
+      total_eligible_to_take_course += 1
       for course_offering in students[student_id].list_of_course_offerings:
         course_no = course_offering.course.course_number
         if course_no == desired_course:
-          if course_offering.student_year in acceptable_semesters:
+          if course_offering.student_year in past_semesters:
             num_who_took_course_previously += 1
           if course_offering.student_year == desired_semester:
             num_who_took_course_during_desired_semester += 1
 
-  total_not_taken_course_before = total_not_taken_course_before - num_who_took_course_previously
+  total_not_taken_course_before = total_eligible_to_take_course - num_who_took_course_previously
 
   if total_not_taken_course_before == 0:
-    baseline_prediction_strength = 0
+    frequency_taken_course = 0
   else: 
-    baseline_prediction_strength = float(num_who_took_course_during_desired_semester)/float(total_not_taken_course_before)
+    frequency_taken_course = float(num_who_took_course_during_desired_semester)/float(total_not_taken_course_before)
   
-  return baseline_prediction_strength
+  # developing the 'mock' test data based on the frequency
+  y_values = []
+  for i in range(1000):
+    random_selection = float(randint(1,100))/100.0
+    # the case that the 'mock' student did not take the course
+    if random_selection > frequency_taken_course:
+      y_values.append(0)
+    else: 
+      y_values.append(1)
 
+  area = compute_ROC(y_values)
+  
+  return area
 
-# TODO: eliminate the people who didn't make it to that particular semester
-# TODO: disclude people who have taken the class from the training data
 # TODO: add major into the x_values, state assumptions being made (switching majors with the
 #       engineering concentration), and choose the majors we want to include based on #
 def create_course_enrollment_data(students, courses, professors, desired_course, current_semester, desired_semester):
@@ -171,14 +180,26 @@ def compute_ROC_for_logistic(logistic, x_test, y_test):
       is represented by the false positives on the x axis and true positives on the y axis. 
   """
   prob = logistic.predict_proba(x_test)
+
   sorted_probabilities = sorted(zip(prob, y_test), key=lambda x:x[0][1], reverse=True)
+
+  y_values = []
+  for (prob, y_value) in sorted_probabilities:
+    y_values.append(y_value)
+  
+  area = compute_ROC(y_values)
+  
+  return area
+
+def compute_ROC(y_values):
+
   true_pos = []
   false_pos = []
   true_pos_total = 0
   false_pos_total = 0
-  total_pos = sum(y_test)
-  total_neg = len(y_test) - total_pos
-  for (probabilities, y_value) in sorted_probabilities:
+  total_pos = sum(y_values)
+  total_neg = len(y_values) - total_pos
+  for y_value in y_values:
     if y_value == 1:
       true_pos_total += 1.0
     else: 
@@ -194,7 +215,7 @@ def compute_ROC_for_logistic(logistic, x_test, y_test):
 
   # area under the ROC curve
   area = area_under_curve(false_pos, true_pos)
-  
+
   return area
   
 
@@ -210,7 +231,7 @@ def prediction_strength_for_a_course(course_number, course_name, current_semeste
       determine what the highested weighted courses are for a given course 
   """
   [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course_number, current_semester, course_semester)
-  frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course_number, course_semester)
+  frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course_number, current_semester, course_semester)
   #test_results = []
   ROC_results = []
   for i in range(number_of_iterations):
