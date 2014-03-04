@@ -114,8 +114,8 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
       course_no = course_offering.course.course_number
       x_vector[course_dict[course_no]] = 1
 
-      # don't include courses that have had less than 20 students enrolled in them (ever)
-      if course_offering.course.total_number_of_students < 20:
+      # don't include courses that have had less than 100 students enrolled in them (ever)
+      if course_offering.course.total_number_of_students < 100:
         x_vector[course_dict[course_no]] = 0
 
       # designate the students that actually did take the desired course during the desired semester
@@ -140,7 +140,7 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
 
   return [all_x_vectors, all_y_values]
 
-def make_logistic(all_x_vectors, all_y_values, test_size):
+def make_logistic(all_x_vectors, all_y_values, test_size, c_value=1e5):
   """ Takes as input x vectors and their corresponding y values as well as the test size, makes 
       all of the training and testing data and makes a linear regression logistic
   """
@@ -148,7 +148,7 @@ def make_logistic(all_x_vectors, all_y_values, test_size):
   # Select traning and testing data
   [x_train, y_train, x_test, y_test] = make_training_data(all_x_vectors, all_y_values, test_size)
 
-  logistic = linear_model.LogisticRegression(C=1e5)
+  logistic = linear_model.LogisticRegression(C=c_value)
   logistic.fit(x_train, y_train)
   return [logistic, x_test, y_test]
 
@@ -226,21 +226,18 @@ def determine_highest_weighted_courses(logistic, all_courses_list, number_of_cou
   sorted_highly_weighted_courses = sorted(zip(logistic.coef_[0], all_courses_list), key=lambda x:abs(x[0]), reverse=True)
   return sorted_highly_weighted_courses[:number_of_courses]
 
-def prediction_strength_for_a_course(course_number, course_name, current_semester, course_semester, number_of_iterations, all_courses_list):
+def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, number_of_iterations, c_value):
   """ Determine prediction strength for a course based on the area under the ROC curve and also
       determine what the highested weighted courses are for a given course 
   """
-  [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course_number, current_semester, course_semester)
-  frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course_number, current_semester, course_semester)
   #test_results = []
   ROC_results = []
   for i in range(number_of_iterations):
-    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, int(len(x_vector)/2))
+    [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, int(len(x_vector)/2), c_value)
     #test_results.append(test_logistic_binary(logistic, x_test, y_test))
     ROC_results.append(compute_ROC_for_logistic(logistic, x_test, y_test))
 
-  our_algorithm_str =  ("Our algorithm: %.4f" % (sum(ROC_results)/len(ROC_results)))
-  baseline_str =       ("Baseline:      %.4f" % frequency_baseline)
+  actual_result = sum(ROC_results)/len(ROC_results)
   
   # Determine highly weighted courses
   highly_weighted_courses = determine_highest_weighted_courses(logistic, all_courses_list, 6)
@@ -252,7 +249,7 @@ def prediction_strength_for_a_course(course_number, course_name, current_semeste
       temp_str += "+"
     temp_str += " " + course_info[1] + '\n'
   
-  return [our_algorithm_str, baseline_str, temp_str]
+  return [actual_result, temp_str]
 
 
 if __name__ == "__main__":
@@ -270,15 +267,48 @@ if __name__ == "__main__":
   #course_semester = ['FF', 'JR2', 'SR2', 'JR2', 'SR2', 'JR1', 'JR1', 'SR2', 'JR2', 'FR']
   #current_semesters = ['', 'JR1', 'SR1', 'JR1', 'SR1', 'SO2', 'SO2', 'SR1', 'JR1', 'FF']
 
-  num = 6
-  course_list = ['ENGR3220']*num
-  course_names = ['HFID']*num
-  course_semester = ['SR1']*num
-  current_semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2']
+  # num = 6
+  # course_list = ['ENGR3220']*num
+  # course_names = ['HFID']*num
+  # course_semester = ['SR1']*num
+  # current_semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2']
 
+  n = 4
+  course_list = ['ENGR3525']*n
+  course_names = ['SoftSys']*n
+  course_semester = ['SO2', 'SO2', 'JR2', 'JR2']
+  current_semesters = ['FR', 'SO1', 'SO2', 'JR1']
+  c_values = np.logspace(-1, 4, num=10)
+  print c_values
+
+  all_courses_averaged_results = []
   for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
-    [our_algorithm_str, baseline_str, description] = prediction_strength_for_a_course(course, course_name, current_semester, desired_semester, 50, all_courses_list)
-    print '%s: %s %s' %(course_name, current_semester, desired_semester)
-    print our_algorithm_str
-    print baseline_str
-    print description
+    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course, current_semester, desired_semester)
+    frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, current_semester, desired_semester)
+    num_students_taken_course_ever = courses[course].total_number_of_students
+    averaged_results = []
+    for c_value in c_values:
+      temp_list = []
+      for i in range(3):
+        [actual_result, description] = prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, 20, c_value)
+        temp_list.append(actual_result)
+      averaged_result = sum(temp_list)/len(temp_list)
+      averaged_results.append(averaged_result)
+      print '%s: %s %s - %s' %(course_name, current_semester, desired_semester, c_value)
+      #print "Total: " + str(num_students_taken_course_ever)
+      #print "Baseline:      %.4f" % frequency_baseline
+      #print description
+      print "Our algorithm: %.4f" % (averaged_result)
+    all_courses_averaged_results.append(averaged_results)
+
+  for i in range(len(course_list)):
+    plt.plot(c_values, all_courses_averaged_results[i])
+  plt.xscale('log')
+  plt.show()
+
+
+
+
+
+
+
