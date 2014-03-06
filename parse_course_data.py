@@ -73,6 +73,10 @@ def get_course_data(filename):
             if course_number == 'FND2710':
                 course_number = 'SCI1210'
 
+            # Software design (before it was Soft Des)
+            if course_number == 'ENG1510':
+                course_number = 'ENGR2510'
+
             if 'AHS' in course_number and 'AHSE' not in course_number:
                 course_number = course_number[:3] + 'E' + course_number[3:]
 
