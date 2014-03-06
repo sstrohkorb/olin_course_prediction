@@ -102,16 +102,19 @@ def get_course_data(filename):
 
             if stud_id not in students:
                 #(self, ID, gender, graduating_class, major, academic_status)
-                new_student = Student(stud_id, gender, grad_year, major, academic_status)
+                new_student = Student(stud_id, gender, grad_year, major, academic_status, concentration)
                 students[stud_id] = new_student
 
             students[stud_id].add_course_offering(course_offering)
 
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
+
+            students[stud_id].major_set.add((year, major))
     
     for s in students:
         students[s].set_final_semester()
+        # students[s].set_major_history()
 
     return [students, courses, professors]
 

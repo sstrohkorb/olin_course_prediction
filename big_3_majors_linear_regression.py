@@ -105,7 +105,7 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
       # student did not make it to desired_semester- discard student
       continue
 
-    x_vector = [0]*len(course_list)
+    x_vector = [0]*(len(course_list) + 1)
     y_value = 0
 
     drop_student = False
