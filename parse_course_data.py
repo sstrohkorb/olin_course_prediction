@@ -114,11 +114,11 @@ def get_course_data(filename):
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
 
-            students[stud_id].major_set.add((year, major))
+            students[stud_id].major_history[year] = major
     
     for s in students:
         students[s].set_final_semester()
-        # students[s].set_major_history()
+        students[s].set_major_history()
 
     return [students, courses, professors]
 

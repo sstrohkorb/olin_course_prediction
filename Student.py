@@ -12,8 +12,8 @@ class Student:
     self.concentration = concentration
     self.academic_status = academic_status
     self.final_semester = None
-    self.major_set = set()
-    self.major_history = []
+    # self.major_set = set()
+    self.major_history = {}
 
   def __str__(self):
     return self.ID + ", " + self.gender + ", " + self.graduating_class + ", " + self.major
@@ -34,5 +34,13 @@ class Student:
 
   def set_major_history(self):
     semesters = {'FF':0, 'FR':1, 'SO1':2, 'SO2':3, 'JR1':4, 'JR2':5, 'SR1':6, 'SR2':7}
-    majors = list(self.major_set)
-    self.major_history = majors.sort(key=lambda x: semesters[x[0]])
+    sem_list = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
+    final = semesters[self.final_semester]
+    for i in range(final):
+      if sem_list[i] not in self.major_history:
+        try:
+          self.major_history[sem_list[i]] = self.major_history[sem_list[i-1]]
+        except:
+          self.major_history[sem_list[i]] = 'Undeclared'
+
+    self.major = self.major_history[self.final_semester]

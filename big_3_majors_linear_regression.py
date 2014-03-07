@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from random import *
 
 semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
+semesters_dict = {semesters[i]:i for i in range(len(semesters))}
 
 def make_training_data(x_vector, y_vector, test_size):
   """ Takes as input all of the x values in a list and the y values in a list and then designates
@@ -96,21 +97,27 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
     course_list.append(course[0])
 
   course_dict = {course_list[i]: i for i in range(len(course_list))}
+  major_dict = {'Undeclared': 0, 'Mechanical Engineering': 1, "Electr'l & Computer Engr": 2, 'Engineering': 3}
 
   all_x_vectors = []
   all_y_values = []
 
   for student_id in students:
-    if students[student_id].final_semester in acceptable_semesters:
+    student = students[student_id]
+    if student.final_semester in acceptable_semesters:
       # student did not make it to desired_semester- discard student
       continue
 
-    x_vector = [0]*(len(course_list) + 1)
+    num_courses = len(course_list)
+    x_vector = [0]*(num_courses + len(major_dict))
     y_value = 0
 
     drop_student = False
 
-    for course_offering in students[student_id].list_of_course_offerings:
+    # Set major for current semester
+    x_vector[num_courses + major_dict[student.major_history[current_semester]]] = 1
+    
+    for course_offering in student.list_of_course_offerings:
       course_no = course_offering.course.course_number
       x_vector[course_dict[course_no]] = 1
 
@@ -232,6 +239,7 @@ def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, numbe
   """
   #test_results = []
   ROC_results = []
+  test_size = int(len(x_vector)/2)
   for i in range(number_of_iterations):
     [logistic, x_test, y_test] = make_logistic(x_vector, y_vector, int(len(x_vector)/2), c_value)
     #test_results.append(test_logistic_binary(logistic, x_test, y_test))
@@ -302,8 +310,10 @@ if __name__ == "__main__":
     all_courses_averaged_results.append(averaged_results)
 
   for i in range(len(course_list)):
-    plt.plot(c_values, all_courses_averaged_results[i])
+    label = '%s: %s-%s' %(course_names[i], current_semesters[i], course_semester[i])
+    plt.plot(c_values, all_courses_averaged_results[i], label=label)
   plt.xscale('log')
+  plt.legend()
   plt.show()
 
 
