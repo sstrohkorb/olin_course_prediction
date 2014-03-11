@@ -6,9 +6,6 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 from random import *
 
-semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
-semesters_dict = {semesters[i]:i for i in range(len(semesters))}
-
 def make_training_data(x_vector, y_vector, test_size):
   """ Takes as input all of the x values in a list and the y values in a list and then designates
       a certain number of them (test_size) as test cases and the rest as training data
