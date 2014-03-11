@@ -246,7 +246,7 @@ def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, numbe
 
 
 if __name__ == "__main__":
-  [students, courses, professors] = get_course_data('../anonymizeddata_UpToFall2013.csv')
+  [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
   all_courses_list = []
   for course in courses: 
     all_courses_list.append([courses[course].course_number, courses[course].title])
