@@ -22,25 +22,21 @@ class Student:
   	self.list_of_course_offerings.append(course_offering)
 
   def set_final_semester(self):
-    semesters = {'FF':0, 'FR':1, 'SO1':2, 'SO2':3, 'JR1':4, 'JR2':5, 'SR1':6, 'SR2':7}
-    max_semester_index = 0
+    max_semester = 0
     for course_offering in self.list_of_course_offerings:
-      if semesters[course_offering.student_year] > max_semester_index:
-        max_semester_index = semesters[course_offering.student_year]
-    
-    for semester in semesters:
-      if semesters[semester] == max_semester_index:
-        self.final_semester = semester
+      if course_offering.student_semester_no > max_semester:
+        max_semester = course_offering.student_semester_no
+    self.final_semester = max_semester
 
   def set_major_history(self):
     semesters = {'FF':0, 'FR':1, 'SO1':2, 'SO2':3, 'JR1':4, 'JR2':5, 'SR1':6, 'SR2':7}
     sem_list = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
-    final = semesters[self.final_semester]
+    final = self.final_semester
     for i in range(final):
-      if sem_list[i] not in self.major_history:
+      if i not in self.major_history:
         try:
-          self.major_history[sem_list[i]] = self.major_history[sem_list[i-1]]
+          self.major_history[i] = self.major_history[i-1]
         except:
-          self.major_history[sem_list[i]] = 'Undeclared'
+          self.major_history[i] = 'Undeclared'
 
     self.major = self.major_history[self.final_semester]

@@ -26,11 +26,6 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   """ Determines a baseline prediction strength based on how many students have taken the course 
       in that semester as to provide a comparison for how good our model actually is
   """
-  for i in range(len(semesters)):
-    if semesters[i] == desired_semester:
-      acceptable_semesters = semesters[:i]
-    if semesters[i] == current_semester:
-      past_semesters = semesters[:i+1]
 
   total_eligible_to_take_course = 0
   total_not_taken_course_before = 0
@@ -41,7 +36,7 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   for student_id in students:
     # make sure that the student made it to the desired semester 
     for course_offering in students[student_id].list_of_course_offerings:
-      if course_offering.student_year == desired_semester:
+      if course_offering.student_semester_no == desired_semester:
         student_made_it_to_desired_semester += 1
         break
     # then determine the rest
@@ -50,9 +45,9 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
       for course_offering in students[student_id].list_of_course_offerings:
         course_no = course_offering.course.course_number
         if course_no == desired_course:
-          if course_offering.student_year in past_semesters:
+          if course_offering.student_semester_no <= current_semester:
             num_who_took_course_previously += 1
-          if course_offering.student_year == desired_semester:
+          if course_offering.student_semester_no == desired_semester:
             num_who_took_course_during_desired_semester += 1
 
   total_not_taken_course_before = total_eligible_to_take_course - num_who_took_course_previously
@@ -84,13 +79,6 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
       all_x_vectors represents the inputs to the linear regression model
       all_y_values represents the outputs to the linear regression model
   """
-  past_semesters = []
-  for i in range(len(semesters)):
-    if semesters[i] == desired_semester:
-      acceptable_semesters = semesters[:i]
-    if semesters[i] == current_semester:
-      past_semesters = semesters[:i+1]
-
 
   course_list = []
   for course in courses:
@@ -104,7 +92,7 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
 
   for student_id in students:
     student = students[student_id]
-    if student.final_semester in acceptable_semesters:
+    if student.final_semester < desired_semester:
       # student did not make it to desired_semester- discard student
       continue
 
@@ -126,17 +114,17 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
         x_vector[course_dict[course_no]] = 0
 
       # designate the students that actually did take the desired course during the desired semester
-      elif course_no == desired_course and course_offering.student_year == desired_semester:
+      elif course_no == desired_course and course_offering.student_semester_no == desired_semester:
         x_vector[course_dict[course_no]] = 0
         y_value = 1
 
       # if the course is in a semester beyond what we're considering, set the y value to 0
       # (not including the 'future' information in our calculations)
-      elif course_offering.student_year not in past_semesters:
+      elif course_offering.student_semester_no > current_semester:
         x_vector[course_dict[course_no]] = 0
 
       # if student has already taken class
-      elif course_no == desired_course and course_offering.student_year in past_semesters:
+      elif course_no == desired_course and course_offering.student_semester_no <= current_semester:
         drop_student = True 
 
     if drop_student:
@@ -281,11 +269,11 @@ if __name__ == "__main__":
   # course_semester = ['SR1']*num
   # current_semesters = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2']
 
-  n = 4
+  n = 1
   course_list = ['ENGR3525']*n
   course_names = ['SoftSys']*n
-  course_semester = ['SO2', 'SO2', 'JR2', 'JR2']
-  current_semesters = ['FR', 'SO1', 'SO2', 'JR1']
+  course_semester = [3] # SO2
+  current_semesters = [2] # SO1
   c_values = np.logspace(-1, 4, num=10)
   print c_values
 

@@ -34,7 +34,7 @@ def get_course_data(filename):
             stud_id = row[2].strip()
             course_semester = row[3].strip()
             gender = row[4].strip()
-            year = row[5].strip() # year when student took course (eg FF, FR, SO, ..)
+            student_semester_str = row[5].strip() # year when student took course (eg FF, FR, SO, ..)
             major = row[6].strip()
             concentration = row[7].strip()
             course_number = row[8].strip()
@@ -48,13 +48,23 @@ def get_course_data(filename):
 
             
             # Combine the course_semester and year into one meaningful variable that describes
-            # what the student's standing is at the time they take a course offering
-            # options: FF, FR, SO1, SO2, JR1, JR2, SR1, SR2
-            if year == 'SO' or year == 'JR' or year == 'SR':
-                if 'Fall' in course_semester: year += '1'
-                elif 'Spring' in course_semester: year += '2'
-            elif year == 'TF':
-                year = 'FF'
+            # what the student's standing is at the time they take a course offering by semester
+            # number (from 0 to 7)
+
+            if student_semester_str == 'TF': student_semester_str = 'FF'
+            
+            student_semester_no = 0     # 'FF'
+
+            if student_semester_str == 'FR':
+                student_semester_no = 1
+            elif student_semester_str == 'SO':
+                student_semester_no = 2
+            elif student_semester_str == 'JR':
+                student_semester_no = 4
+            elif student_semester_str == 'SR':
+                student_semester_no = 6
+
+            if 'Spring' in course_semester: student_semester_no += 1
 
             # keys = course #
             # values = equivalent course #
@@ -100,7 +110,7 @@ def get_course_data(filename):
             course.total_number_of_students += 1
             professors[professor_name] = professors.get(professor_name, Professor(professor_name))
             # (self, semester, section_title, section_no, Course)
-            course_offering = Course_Offering(course_semester, year, section_title, section_no, course)
+            course_offering = Course_Offering(course_semester, student_semester_no, section_title, section_no, course)
             course_offering.set_professor(professors[professor_name])
 
 
@@ -114,7 +124,7 @@ def get_course_data(filename):
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
 
-            students[stud_id].major_history[year] = major
+            students[stud_id].major_history[student_semester_no] = major
     
     for s in students:
         students[s].set_final_semester()
