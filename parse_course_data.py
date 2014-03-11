@@ -25,7 +25,7 @@ def get_course_data(filename):
     courses = {} #course_number:Course
     professors = {}#name:Professor
 
-    with open(filename,'rb') as f:
+    with open(filename,'rU') as f:
         contents = csv.reader(f)
         matrix = list()
         for row in contents:
@@ -46,6 +46,10 @@ def get_course_data(filename):
             if academic_status == 'Academic Status Code':
                 continue
 
+            # Don't include Lab classes 
+            if ' L' in course_number:
+                continue
+
             
             # Combine the course_semester and year into one meaningful variable that describes
             # what the student's standing is at the time they take a course offering by semester
@@ -64,32 +68,23 @@ def get_course_data(filename):
             elif student_semester_str == 'SR':
                 student_semester_no = 6
 
-            if 'Spring' in course_semester: student_semester_no += 1
+            if 'SP' in course_semester: student_semester_no += 1
 
+            # Cleaning course data by setting equivalent course information
+            
             # keys = course #
             # values = equivalent course #
             equivalent_courses = {}
 
-            # Populating equivalent courses with the AHS/AHSE stuff
-            
-            if course_number == 'AHS1110':
-                course_number = 'AHSE1100'
-            if course_number == 'AHS1111':
-                course_number = 'AHSE2131'
-            if course_number == 'AHS1140':
-                course_number = 'AHSE2120'
-
-            # Combining the mod bio courses into one
-            if course_number == 'FND2710':
-                course_number = 'SCI1210'
-
-            # Software design (before it was Soft Des)
-            if course_number == 'ENG1510':
-                course_number = 'ENGR2510'
-
-            if 'AHS' in course_number and 'AHSE' not in course_number:
-                course_number = course_number[:3] + 'E' + course_number[3:]
-
+            classes_to_convert = [
+                ('AHS1110', 'AHSE1100'),
+                ('AHS1111', 'AHSE2131'),
+                ('AHS1140', 'AHSE2120'),
+                ('FND2710', 'SCI1210'),     # Mod Bio
+                ('ENG1510', 'ENGR2510')     # Software design (before it was Soft Des)
+            ]
+            for old, current in classes_to_convert:
+                equivalent_courses[old] = current
 
             # Populating equivalent courses with the Speical Topics stuff
             special_topics = ['AHSE2199','AHSE3199','AHSE3599','AHSE4199','ENGR1199','ENGR2199','ENGR2299','ENGR2599','ENGR2699','ENGR3199','ENGR3299','ENGR3399','ENGR3499','ENGR3599','ENGR3699','ENGR3899','MTH2188','MTH2199','MTH3199','SCI2099','SCI2199','SCI2299','SCI2399','SCI3199']
@@ -97,13 +92,17 @@ def get_course_data(filename):
                 for letter in 'ABC':
                     equivalent_courses[st+letter] = st
 
-
-            # Populating equivalent courses with other random stuff
-            if course_number.endswith('X'):
-                course_number = course_number[:-1]
-
             if course_number in equivalent_courses:
                 course_number = equivalent_courses[course_number]
+
+            # AHS vs. AHSE problem 
+            if 'AHS' in course_number and 'AHSE' not in course_number:
+                course_number = course_number[:3] + 'E' + course_number[3:]
+
+
+            # Removing the X on the end of course numbers (For an IS)
+            if course_number.endswith('X'):
+                course_number = course_number[:-1]
 
             courses[course_number] = courses.get(course_number, Course(course_title, course_number))
             course = courses[course_number]
