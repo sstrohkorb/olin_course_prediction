@@ -82,7 +82,35 @@ def get_testing_sets(students, semester):
                 break
     return current_students, past_students
 
+def simulate_course(students, all_courses_list, professors, course, current_students, c_vals):
+    """
+    Get expected enrollment for course
+    """
+    starting_semester = '0203FA'
+    end_sem = '1314FA'
+    expected_enrollements = [0] * 7
+    max_rocs = [0] * 7
+    #TODO: only look at spring semesters, weight c-values?
+    for current_semester in range(7):
+        if len(current_students[current_semester]) == 0:
+            continue
+        desired_semester = current_semester + 1
+        [x_vector, y_vector] = bmlg.create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester, ending_semester=end_sem)
+        [x_test, y_test] = bmlg.create_course_enrollment_data(current_students[current_semester], all_courses_list, professors, starting_semester, course, current_semester, current_semester, ending_semester=end_sem)
+        if len(x_vector) < 5 or len(x_test) < 1:
+            continue
 
+        best_c, max_result, averaged_results = tune_c(x_vector, y_vector, all_courses_list, c_values=c_vals, num_iter=20)
+        # print 'best c: %s'%best_c
+        # print 'max_result:%s'%max_result
+        max_rocs[current_semester] = max_result
+
+        expected_enrollements[current_semester] = sum(expected_enrollment_for_course(x_vector, y_vector, x_test, best_c))
+        print 'enrollment for semester %s: %s'%(current_semester, enr_for_sem)
+        
+    total_expected = sum(expected_enrollements)
+
+    return expected_enrollements, total_expected, max_rocs
 
 
 if __name__ == '__main__':
@@ -98,30 +126,4 @@ if __name__ == '__main__':
 
     c_vals = np.logspace(-1, 4, num=10)
 
-    # course = 'ENGR3525' #softsys
-    course = 'ENGR2250' #uocd
-    # course = 'ENGR3380' #dfm
-    # current_semester = 2
-    # desired_semester = 3
-    starting_semester = '0203FA'
-    end_sem = '1314FA'
-    expected_enrollement = 0
-    #TODO: only look at spring semesters, weight c-values?
-    for current_semester in range(7):
-        if len(current_students[current_semester]) == 0:
-            continue
-        desired_semester = current_semester + 1
-        [x_vector, y_vector] = bmlg.create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester, ending_semester=end_sem)
-        [x_test, y_test] = bmlg.create_course_enrollment_data(current_students[current_semester], all_courses_list, professors, starting_semester, course, current_semester, current_semester, ending_semester=end_sem)
-        if len(x_vector) < 5 or len(x_test) < 1:
-            continue
 
-        best_c, max_result, averaged_results = tune_c(x_vector, y_vector, all_courses_list, c_values=c_vals, num_iter=3)
-        print 'best c: %s'%best_c
-        print 'max_result:%s'%max_result
-
-        enr_for_sem = sum(expected_enrollment_for_course(x_vector, y_vector, x_test, best_c))
-        print 'enrollment for semester %s: %s'%(current_semester, enr_for_sem)
-        expected_enrollement += enr_for_sem
-
-    print 'total expected enrollment: %s'%(expected_enrollement)
