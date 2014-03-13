@@ -113,6 +113,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
 
   for student_id in students:
     student = students[student_id]
+
     if student.final_semester < desired_semester:
       # student did not make it to desired_semester- discard student
       continue
@@ -130,6 +131,11 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
     x_vector[num_courses + major_dict[student.major_history[current_semester]]] = 1
     
     for course_offering in student.list_of_course_offerings:
+
+      # student did not reach desired_semester as of end_semester
+      if course_offering.semester == ending_semester:
+        if course_offering.student_semester_no < desired_semester:
+          drop_student = True
 
       course_no = course_offering.course.course_number
       x_vector[course_dict[course_no]] = 1
@@ -326,7 +332,7 @@ if __name__ == "__main__":
 
   all_courses_averaged_results = []
   for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
-    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester)
+    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester, ending_semester='1314FA')
     frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, current_semester, desired_semester)
     num_students_taken_course_ever = courses[course].total_number_of_students
     averaged_results = []
