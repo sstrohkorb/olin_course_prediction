@@ -25,6 +25,7 @@ def get_course_data(filename):
     courses = {} #course_number:Course
     professors = {}#name:Professor
     semester_list_per_student = {}
+    validation_courses = {}
 
     start = 2
     end = 14
@@ -338,6 +339,12 @@ def get_course_data(filename):
             else:
                 num_iterations = 1
 
+            if course_semester == '1314SP':
+                if course_number not in validation_courses:
+                    validation_courses[course_number] = [course_number, course_title, section_title, professor_name, 1]
+                else:
+                    validation_courses[course_number][4] += 1
+
             for i in range(num_iterations):
                 if num_iterations == 2:
                     course_number = course_numbers[i]
@@ -350,6 +357,7 @@ def get_course_data(filename):
                 professors[professor_name] = professors.get(professor_name, Professor(professor_name))
                 course_offering = Course_Offering(course_semester, student_semester_no, section_no, course)
                 course_offering.set_professor(professors[professor_name])
+                course_offering.enrollment += 1
 
 
             if stud_id not in students:
@@ -374,6 +382,24 @@ def get_course_data(filename):
         students[s].set_first_semester(semester_list_per_student[s], semesters)
         students[s].set_final_semester()
         students[s].set_major_history()
+
+    # To get the Course data for Sp 2014
+
+    # for c1 in validation_courses:
+    #     # course ids
+    #     print validation_courses[c1][0]
+    # for c2 in validation_courses:
+    #     # course title
+    #     output = validation_courses[c2][1]
+    #     if len(validation_courses[c2][2]) > 0:
+    #         output += ": " + validation_courses[c2][2]
+    #     print output
+    # for c3 in validation_courses:
+    #     # prof
+    #     print validation_courses[c3][3]
+    # for c4 in validation_courses:
+    #     # number of students
+    #     print validation_courses[c4][4]
 
     return [students, courses, professors]
 
