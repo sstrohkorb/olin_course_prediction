@@ -279,6 +279,13 @@ def write_to_csv_file(filename, row_headings, data):
 if __name__ == "__main__":
   [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
   semesters = make_semesters_dict()
+  spring_14_courses = ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
+    'ENGR3499', 'ENGR3299', 'ENGR3810', 'MTH2140', 'SCI2214', 'ENGR1330', 'ENGR2350', 'MTH3170', 'MTH2188A', 
+    'ENGR4190', 'AHSE3190', 'ENGR2599', 'AHSE3199', 'ENGR2410', 'MTH2199', 'ENGR2141', 'ENGR3370', 'SCI2320', 
+    'AHSE0112', 'ENGR2510', 'SCI1410', 'ENGR3525', 'SUST3301', 'ENGR4290', 'SCI3320', 'ENGR3620', 'ENGR3820', 
+    'ENGR2330', 'SCI2130B', 'ENGR3199', 'ENGR3399', 'SCI1310', 'MTH3120', 'AHSE4590', 'SCI1210', 'ENGR2199C', 
+    'ENGR3392', 'AHSE1500', 'ENGR1121', 'SCI1130', 'ENGR3415', 'AHSE2199', 'AHSE2199B', 'AHSE2199A', 'SCI1199B', 
+    'ENGR2210', 'ENGR2250', 'ENGR2420', 'ENGR3260', 'SCI2140']
   all_courses_list = []
   for course in courses: 
     all_courses_list.append([courses[course].course_number, courses[course].title])
