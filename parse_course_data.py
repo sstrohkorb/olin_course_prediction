@@ -24,8 +24,24 @@ def get_course_data(filename):
     students = {} #id:Student
     courses = {} #course_number:Course
     professors = {}#name:Professor
+    semester_list_per_student = {}
 
-    with open(filename,'rb') as f:
+    start = 2
+    end = 14
+    semesters = {}
+    for i in range((end - start)):
+      temp_start = str(start + i)
+      temp_end = str(start + i + 1)
+      if len(temp_start) == 1:
+        temp_start = '0' + temp_start
+      if len(temp_end) == 1:
+        temp_end = '0' + temp_end
+      sem_fa = temp_start + temp_end + 'FA'
+      sem_sp = temp_start + temp_end + 'SP' 
+      semesters[sem_fa] = i * 2
+      semesters[sem_sp] = i * 2 + 1
+
+    with open(filename,'rU') as f:
         contents = csv.reader(f)
         matrix = list()
         for row in contents:
@@ -46,6 +62,31 @@ def get_course_data(filename):
             if academic_status == 'Academic Status Code':
                 continue
 
+            non_included_courses = [
+                'ENGR3520A',    # Project that went along with FOCS one year
+                'OIE1000',      # OIE
+                'OIP1000',      # The Olin Internship Practicum
+                'AHSE11BA',     # Babson Cross Registration
+                'BAB5001',      # Babson Cross Registration
+                'BAB1001',      # Babson Cross Registration
+                'ENGR1510',     # Introductory Programming (no equivalent down the line)
+                'CD1097',       # Curriculum Development Activity
+                'E! CAP SPR',   # Entrepreneurship CapstoneSpring Pre-registration
+                'SEM 401',      # Seminars
+                'SEM 301',
+                'SEM 302',
+                'AHSE2141',     # Disregard AHS part of Engineering for Humanity
+                'AHSE CAP SPR', # AHS CapstoneSpring Pre-registration
+                'SCI10WE',      # Wellesley Cross Registration
+                'ENGR3425',     # Analog VLSI didn't have an easy latter equivalent
+                'ICB2',         # Lecture Component of ICB2, already accounted for in course numbers
+                'ICB1',         # Lecture Component of ICB1, already accounted for in course numbers
+                'MTH3130'       # Mathematical Analysis (2 cr) - 16 people - doesn't fit what came after well
+            ]
+            # Don't include Lab classes or classes we don't want to include
+            if ' L' in course_number or course_number in non_included_courses or course_title == 'AHS CapstoneSpring Pre-registration':
+                continue
+
             
             # Combine the course_semester and year into one meaningful variable that describes
             # what the student's standing is at the time they take a course offering by semester
@@ -64,54 +105,251 @@ def get_course_data(filename):
             elif student_semester_str == 'SR':
                 student_semester_no = 6
 
-            if 'Spring' in course_semester: student_semester_no += 1
+            if 'SP' in course_semester: student_semester_no += 1
+
+            # Cleaning course data by setting equivalent course information
+
+            # AHS vs. AHSE problem 
+            if 'AHS' in course_number and 'AHSE' not in course_number:
+                course_number = course_number[:3] + 'E' + course_number[3:]
 
             # keys = course #
             # values = equivalent course #
             equivalent_courses = {}
 
-            # Populating equivalent courses with the AHS/AHSE stuff
-            
-            if course_number == 'AHS1110':
-                course_number = 'AHSE1100'
-            if course_number == 'AHS1111':
-                course_number = 'AHSE2131'
-            if course_number == 'AHS1140':
-                course_number = 'AHSE2120'
-
-            # Combining the mod bio courses into one
-            if course_number == 'FND2710':
-                course_number = 'SCI1210'
-
-            # Software design (before it was Soft Des)
-            if course_number == 'ENG1510':
-                course_number = 'ENGR2510'
-
-            if 'AHS' in course_number and 'AHSE' not in course_number:
-                course_number = course_number[:3] + 'E' + course_number[3:]
-
-
-            # Populating equivalent courses with the Speical Topics stuff
-            special_topics = ['AHSE2199','AHSE3199','AHSE3599','AHSE4199','ENGR1199','ENGR2199','ENGR2299','ENGR2599','ENGR2699','ENGR3199','ENGR3299','ENGR3399','ENGR3499','ENGR3599','ENGR3699','ENGR3899','MTH2188','MTH2199','MTH3199','SCI2099','SCI2199','SCI2299','SCI2399','SCI3199']
-            for st in special_topics:
-                for letter in 'ABC':
-                    equivalent_courses[st+letter] = st
-
-
-            # Populating equivalent courses with other random stuff
-            if course_number.endswith('X'):
-                course_number = course_number[:-1]
+            classes_to_convert = [
+                ('FND2490', 'ENGR2250'),    # FND UOCD
+                ('FND1310', 'MTH1110'),     # FND Calculus - 2006
+                ('FND1312', 'MTH1110'),     # FND Calculus - 2007
+                ('FND2510', 'ENGR2410'),    # FND Sig Sys
+                ('FND1510', 'ENGR1110'),    # FND Mod Con
+                ('FND2610', 'AHSE1500'),    # FND FBE
+                ('FND2240', 'SCI1410'),     # FND Mat Sci
+                ('FND1210', 'SCI1111'),     # FND Physics side of Mod Sim (check on this, was called 'Physical Foundations ofEngineering I')
+                ('FND1311', 'MTH2140'),     # FND Diff Eq
+                ('FND1410', 'ENGR1200'),    # FND precursor to Design Nature
+                ('FND1420', 'ENGR1121'),    # FND clocest thing we could get was Real World Measurements
+                ('FND2350', 'MTH2130'),     # FND clocest thing is Prob Stat (Applied Mathematical Methods)
+                ('FND2710', 'SCI1210'),     # FND Mod Bio
+                ('AHS1110', 'AHSE1100'),    # AHS -> AHSE
+                ('AHS1111', 'AHSE2131'),    # AHS -> AHSE
+                ('AHS1140', 'AHSE2120'),    # AHS -> AHSE
+                ('ELE1050', 'ENGR2510'),    # Software design (before it was Soft Des)
+                ('ENG1510', 'ENGR2510'),    # Software design (before it was Soft Des)
+                ('MTH3198', 'MTH4198'),     # Consolidating the 2 OSS in Mathematics
+                ('ISR1300', 'MTH0098'),     # IS in Mathematics
+                ('ISR1100', 'AHSE0198'),    # IS inArts Humanities Social Science
+                ('AHSE3198', 'AHSE0198'),   # IS inArts Humanities Social Science
+                ('AHSE1198', 'AHSE0198'),   # IS inArts Humanities Social Science
+                ('SCI3098', 'SCI0098'),     # IS in theSciences
+                ('SCI1098', 'SCI0098'),     # IS in theSciences
+                ('ENGR3098', 'ENGR0098'),   # IS in Engineering
+                ('ISR1500', 'ENGR0098'),    # IS/Research inComputing, Electrical orSystems -> IS in Engineering
+                ('ISR2900', 'ENGR0098'),    # IS & ResearchTechnical Concepts -> IS in Engineering
+                ('ISR1200', 'SCI0098'),     # IS & Research:Physical Concepts -> IS in theSciences
+                ('ISR1020', 'AHSE0198'),    # IS & ResearchMusical Concepts -> IS inArts Humanities Social Science
+                ('ISR1030', 'ENGR0098'),    # IS/Research inDesign Concepts -> IS in Engineering
+                ('ISR1900', 'ENGR0098'),    # IS & ResearchTechnical Concepts -> IS in Engineering
+                ('SCI1410A', 'SCI1410'),    # Mat Sci
+                ('ELE2715', 'SCI2320'),     # Applied Organic Chemistry -> Organic Chemistry with Lab
+                ('SCI1110', 'SCI1130'),     # Mechanics
+                ('MEC1915', 'ENGR2320'),    # Mech Solids
+                ('ENGR3320', 'ENGR2320'),   # Mech Solids
+                ('SCI2220', 'ENGR2620'),    # Biomechanics
+                ('SCI3110', 'SCI2130'),     # Modern Physics
+                ('ENGR3812', 'SCI3120'),    # Solid State Physics
+                ('SCI1121A', 'SCI1121'),    # E&M
+                ('SCI1120', 'SCI1121'),     # E&M
+                ('ENGR3290', 'ENGR4290'),   # ADE
+                ('ENGR1120', 'ENGR1121'),   # Real World Measurements
+                ('ENGR3380', 'ENGR3260'),   # DFM
+                ('ENGR3340', 'ENGR2340'),   # Dynamics
+                ('MEC2910', 'ENGR2350'),    # Thermodynamics
+                ('ENGR3350', 'ENGR2350'),   # Thermodynamics
+                ('MTH2310', 'MTH2110'),     # Discrete 
+                ('ECE2910', 'ENGR2420'),    # Circuits
+                ('MTH3140', 'ENGR3140'),    # Error control codes
+                ('MTH1097', 'MTH0097'),     # Undergraduate Research inMathematics
+                ('SCI1097', 'SCI0097'),     # Undergraduate Research in theSciences
+                ('ENGR1097', 'ENGR0097'),   # Undergraduate Research inEngineering
+                ('AHSE1197', 'AHSE0197'),   # Undergraduate Research inArts, Humanities, Social Science
+                ('MTH1000', 'MTH1110'),     # Calculus
+                ('MEC1000', 'ENGR1330'),    # Fundamentals of Machine ShopOperations
+                ('AHSE1120', 'AHSE1100'),   # History of Tech
+                ('AHSE3500', 'AHSE3599'),   # Entrepreneurship: Real TimeCase Study -> Special Topics in Business andEntrepreneurship
+                ('AHSE1599', 'AHSE1500'),   # Entrepreneurship FoundationTopic -> FBE
+                ('AHSE1140', 'AHSE1145'),   # Anthropology Foundation
+                ('AHSE2140', 'AHSE1145'),   # Anthropology Foundation
+                ('ENGR3430', 'ENGR3426'),   # Digital VLSI -> Mixed Analog-Digital VLSI I
+                ('AHSE1135', 'AHSE1130'),   # Seeing and Hearing
+                ('ELE1010', 'AHSE2131'),    # Responsive Drawing and VisualThinking
+                ('MTH2150', 'MTH2130'),     # Applied Mathematical Methods -> Prob Stat
+                ('AHSE3100', 'AHSE3199'),   # Leadership and Ethics
+                ('ENGR1199A', 'ENGR1199'),  # Energy Systems in Urban Design
+                ('ENGR3299A', 'ENGR3270'),  # Real Products, Real Markets
+                ('ENGR3699', 'ENGR3630'),   # Transport in Biological Systems
+                ('SCI2099B', 'SCI2099'),    # Special Topics: Art of Approximation
+                ('SCI2199', 'ENGR3355'),    # Renewable Energy
+                ('SCI3199', 'SCI2145'),     # High Energy Astrophysics
+                ('MTH3199A', 'MTH3160'),    # Intro to Complex Variables
+                ('ELE1025', 'AHSE1122'),    # Wired Ensemble
+                ('ELE1020', 'AHSE1122')     # Wired Ensemble
+            ]
+            for old, current in classes_to_convert:
+                equivalent_courses[old] = current
 
             if course_number in equivalent_courses:
                 course_number = equivalent_courses[course_number]
+            
+            # SPECIAL MANIPULATIONS
 
-            courses[course_number] = courses.get(course_number, Course(course_title, course_number))
-            course = courses[course_number]
-            course.total_number_of_students += 1
-            professors[professor_name] = professors.get(professor_name, Professor(professor_name))
-            # (self, semester, section_title, section_no, Course)
-            course_offering = Course_Offering(course_semester, student_semester_no, section_title, section_no, course)
-            course_offering.set_professor(professors[professor_name])
+            # Digital Signal Processing used to be a Speical Topics
+            if course_number == 'ENGR3499B' and 'Digital Signal Processing' in section_title:
+                course_number = 'ENGR3415'
+                course_title = 'Digital Signal Processing'
+                section_title = ''
+
+            elif course_number == 'AHSE1102':
+                course_title = 'Arts and Humanities: Self-Explored in Art and Philosp'
+
+            # Foundation Topic in Physics
+            elif course_number == 'SCI1199':
+                # Phys of Conserv Laws: Energy Foc by Mechtenberg, Abigail 
+                if course_title in 'Phys of Conserv Laws: Energy Foc' or 'Phys of Conserv Laws: Energy Foc' in course_title:
+                    course_number = 'SCI1199A'
+                # Phys of Conserv Laws: Waves
+                else:
+                    course_number = 'SCI1199B'
+
+            # Linearity 1 and 2
+            elif course_number == 'MTH2188':
+                # Linearity 1's equivalent is Linear Algebra and Differential Equations for our purposes
+                if section_title in 'Linearity 1' or 'Linearity 1' in section_title:
+                    course_number = 'MTH2188A'
+                # Linearity 2's equivalent is Vector Calculus for our purposes
+                else:
+                    course_number = 'MTH1120'
+
+            # Two courses with ENGR3345
+            elif course_number == 'ENGR3345':
+                # Mechanical and Aerospace Systems
+                if course_title in 'Mechanical and Aerospace Systems' or 'Mechanical and Aerospace Systems' in section_title:
+                    course_number = 'ENGR3345A'
+                # Dynamic Systems
+                else:
+                    course_number = 'ENGR3345B'
+
+            # Some of the 'Heroes for the RenaissanceEngineer: Leonardo, Nabokov,Bach and Borodin' classes are misnumbered
+            elif course_number == 'AHSE1145':
+                if 'RenaissanceEngineer' in course_title:
+                    course_number = 'AHSE2120'
+
+            # Modern Physics had a previous number (same as Quantum Physics, oops!)
+            elif course_number == 'SCI2130':
+                # Modern Physics
+                if course_title == 'Modern Physics':
+                    course_number = 'SCI2130A'
+                # Quantum Physics
+                else:
+                    course_number = 'SCI2130B'
+
+            # Mod Con was previously called 'Engineering of Compartment Systems'
+            elif course_number == 'ENGR1110':
+                course_title = 'Modeling and Control'
+
+            # Arts, Humanities, Social ScienceFoundation Topic
+            elif course_number == 'AHSE1199':
+                # Art Since 1945: Movmt Theme Cntx
+                if 'Art Since 1945' in section_title:
+                    course_number = 'AHSE1199A'
+                # Creative Writing Workshop
+                elif 'Creative Wr' in section_title:
+                    course_number = 'AHSE1199B'
+                # How Supreme Court Shapes Amer
+                elif 'How Supreme Court' in section_title:
+                    course_number = 'AHSE1199C'
+                # Islam and the West: Politic/Cult
+                elif 'Islam' in section_title:
+                    course_number = 'AHSE1199D'
+                # Media Revolution:Activism & Tech
+                elif 'Media Revolution' in section_title:
+                    course_number = 'AHSE1199E'
+                # Globalzatn: Culture Econ Politic
+                elif 'Globalzatn' in section_title:
+                    course_number = 'AHSE1199F'
+                # Robots, Mutants & Monsters: Envi
+                elif 'Robots, Mutants' in section_title:
+                    course_number = 'AHSE1199G'
+                # The Play's the Thing:Shakespeare
+                elif 'Shakespeare' in section_title:
+                    course_number = 'AHSE1199H'
+                # Anthropology
+                elif 'Human Connection' in section_title:
+                    course_number = 'AHSE1145'
+                # Identity from the Mind adn Brain
+                elif 'Identity' in section_title:
+                    course_number = 'AHSE1155'
+                # Environment and Health
+                elif 'Heath and the Urban' in section_title:
+                    course_number = 'ELE1090'
+
+            title_changes = [
+                ('AHSE1100', 'History of Technology:A Cultural & Contextual Approach'),
+                ('ENGR4190', 'Senior Capstone Program inEngineering (SCOPE)'),
+                ('ENGR3426', 'Mixed Analog-Digital VLSI I'),
+                ('ENGR2510', 'Software Design'),
+                ('SCI2320', 'Applied Organic Chemistry'),
+                ('SCI1111', 'Modeling and Simulation of thePhysical World'),
+                ('MTH2140', 'Differential Equations'),
+                ('MTH1110', 'Calculus'),
+                ('AHSE0198', 'Independent Study in Arts, Humanities, Social Science'),
+                ('SCI1121', 'Electricity and Magnetism'),
+                ('MTH2130', 'Probability and Statistics'),
+                ('AHSE1500', 'Foundations of Business andEntrepreneurship'),
+                ('AHSE1130', 'Seeing and Hearing:Communicating with Photographs,Video and Sound'),
+                ('ENGR2420', 'Intro Microelectronic Circuits'),
+                ('AHSE1122', 'The Wired Ensemble -Instruments, Voices, Players'),
+                ('SCI0098', 'Independent Study inScience'),
+                ('SCI1410', 'Materials Science and SolidState Chemistry with lab'),
+                ('ENGR1200', 'Design Nature'),
+                ('ENGR0098', 'Independent Study in Engineering'),
+                ('ENGR1121', 'Real World Measurements')
+            ]
+
+            for course_no, final_title in title_changes:
+                if course_number == course_no:
+                    course_title = final_title
+
+            # Removing the X on the end of course numbers (For an IS)
+            if course_number.endswith('X'):
+                course_number = course_number[:-1]
+
+            # Breaking Linearity and 2006's math blocks into their respective math courses 
+            # MTH2188A ['Special Topics in Mathematics', 'Linearity 1']
+            # FND1320  Mathematical Foundations ofEngineering II:  Linear Algebra and Vector Calculus
+            if course_number == 'MTH2188A' or course_number == 'FND1320':
+                num_iterations = 2
+                if course_number == 'MTH2188A':
+                    course_numbers = ['MTH2120', 'MTH2140']
+                    course_titles = ['Linear Algebra', 'Differential Equations']
+                else:
+                    course_numbers = ['MTH1120', 'MTH2120']
+                    course_titles = ['Vector Calculus', 'Linear Algebra']
+            else:
+                num_iterations = 1
+
+            for i in range(num_iterations):
+                if num_iterations == 2:
+                    course_number = course_numbers[i]
+                    course_title = course_titles[i]
+                    section_title = ''
+
+                courses[course_number] = courses.get(course_number, Course(course_title, section_title, course_number))
+                course = courses[course_number]
+                course.total_number_of_students += 1
+                professors[professor_name] = professors.get(professor_name, Professor(professor_name))
+                course_offering = Course_Offering(course_semester, student_semester_no, section_no, course)
+                course_offering.set_professor(professors[professor_name])
 
 
             if stud_id not in students:
@@ -121,12 +359,19 @@ def get_course_data(filename):
 
             students[stud_id].add_course_offering(course_offering)
 
+            if stud_id in semester_list_per_student:
+                if course_semester not in semester_list_per_student[stud_id]:
+                    semester_list_per_student[stud_id].append(course_semester)
+            else:
+                semester_list_per_student[stud_id] = [course_semester]
+
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
 
             students[stud_id].major_history[student_semester_no] = major
     
     for s in students:
+        students[s].set_first_semester(semester_list_per_student[s], semesters)
         students[s].set_final_semester()
         students[s].set_major_history()
 

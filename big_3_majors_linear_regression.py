@@ -6,6 +6,25 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 from random import *
 
+
+def make_semesters_dict():
+  start = 2
+  end = 14
+  semesters = {}
+  for i in range((end - start)):
+    temp_start = str(start + i)
+    temp_end = str(start + i + 1)
+    if len(temp_start) == 1:
+      temp_start = '0' + temp_start
+    if len(temp_end) == 1:
+      temp_end = '0' + temp_end
+    sem_fa = temp_start + temp_end + 'FA'
+    sem_sp = temp_start + temp_end + 'SP' 
+    semesters[sem_fa] = i * 2
+    semesters[sem_sp] = i * 2 + 1
+  return semesters
+
+
 def make_training_data(x_vector, y_vector, test_size):
   """ Takes as input all of the x values in a list and the y values in a list and then designates
       a certain number of them (test_size) as test cases and the rest as training data
@@ -23,6 +42,8 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   """ Determines a baseline prediction strength based on how many students have taken the course 
       in that semester as to provide a comparison for how good our model actually is
   """
+
+  # TODO: Add input for the starting semester
 
   total_eligible_to_take_course = 0
   total_not_taken_course_before = 0
@@ -70,7 +91,7 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
 
 # TODO: add major into the x_values, state assumptions being made (switching majors with the
 #       engineering concentration), and choose the majors we want to include based on #
-def create_course_enrollment_data(students, courses, professors, desired_course, current_semester, desired_semester):
+def create_course_enrollment_data(students, courses, professors, starting_semester, desired_course, current_semester, desired_semester):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input. 
       all_x_vectors represents the inputs to the linear regression model
@@ -91,6 +112,9 @@ def create_course_enrollment_data(students, courses, professors, desired_course,
     student = students[student_id]
     if student.final_semester < desired_semester:
       # student did not make it to desired_semester- discard student
+      continue
+    if semesters[student.first_semester] < semesters[starting_semester]:
+      # if the student started at Olin before the input starting_semester, discard student
       continue
 
     num_courses = len(course_list)
@@ -246,7 +270,8 @@ def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, numbe
 
 
 if __name__ == "__main__":
-  [students, courses, professors] = get_course_data('../anonymizeddata_UpToFall2013.csv')
+  [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+  semesters = make_semesters_dict()
   all_courses_list = []
   for course in courses: 
     all_courses_list.append([courses[course].course_number, courses[course].title])
@@ -272,11 +297,12 @@ if __name__ == "__main__":
   course_semester = [3] # SO2
   current_semesters = [2] # SO1
   c_values = np.logspace(-1, 4, num=10)
+  starting_semester = '0203FA'
   print c_values
 
   all_courses_averaged_results = []
   for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
-    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, course, current_semester, desired_semester)
+    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester)
     frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, current_semester, desired_semester)
     num_students_taken_course_ever = courses[course].total_number_of_students
     averaged_results = []
