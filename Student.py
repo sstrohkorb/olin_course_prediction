@@ -1,4 +1,4 @@
-# Sarah is ID# 721
+# Sarah is ID# 721 in the old data, #493 in the updated data
 # Berit is ID# 572
 
 class Student:
