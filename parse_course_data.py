@@ -26,6 +26,21 @@ def get_course_data(filename):
     professors = {}#name:Professor
     semester_list_per_student = {}
 
+    start = 2
+    end = 14
+    semesters = {}
+    for i in range((end - start)):
+      temp_start = str(start + i)
+      temp_end = str(start + i + 1)
+      if len(temp_start) == 1:
+        temp_start = '0' + temp_start
+      if len(temp_end) == 1:
+        temp_end = '0' + temp_end
+      sem_fa = temp_start + temp_end + 'FA'
+      sem_sp = temp_start + temp_end + 'SP' 
+      semesters[sem_fa] = i * 2
+      semesters[sem_sp] = i * 2 + 1
+
     with open(filename,'rU') as f:
         contents = csv.reader(f)
         matrix = list()
@@ -356,7 +371,7 @@ def get_course_data(filename):
             students[stud_id].major_history[student_semester_no] = major
     
     for s in students:
-        students[s].set_first_semester(semester_list_per_student[s])
+        students[s].set_first_semester(semester_list_per_student[s], semesters)
         students[s].set_final_semester()
         students[s].set_major_history()
 

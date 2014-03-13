@@ -29,22 +29,7 @@ class Student:
         max_semester = course_offering.student_semester_no
     self.final_semester = max_semester
 
-  def set_first_semester(self, semester_list):
-    start = 2
-    end = 14
-    semesters = {}
-    for i in range((end - start)):
-      temp_start = str(start + i)
-      temp_end = str(start + i + 1)
-      if len(temp_start) == 1:
-        temp_start = '0' + temp_start
-      if len(temp_end) == 1:
-        temp_end = '0' + temp_end
-      sem_fa = temp_start + temp_end + 'FA'
-      sem_sp = temp_start + temp_end + 'SP' 
-      semesters[sem_fa] = i * 2
-      semesters[sem_sp] = i * 2 + 1
-
+  def set_first_semester(self, semester_list, semesters):
     min_semester_index = 100
     for semester in semester_list:
       if semesters[semester] < min_semester_index:
