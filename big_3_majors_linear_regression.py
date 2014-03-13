@@ -269,6 +269,13 @@ def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, numbe
   return [actual_result, temp_str]
 
 
+def write_to_csv_file(filename, row_headings, data):
+  f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
+  f.writerow(row_headings)
+  for data_entry in data:
+    f.writerow(data_entry)
+
+
 if __name__ == "__main__":
   [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
   semesters = make_semesters_dict()
@@ -298,7 +305,6 @@ if __name__ == "__main__":
   current_semesters = [2] # SO1
   c_values = np.logspace(-1, 4, num=10)
   starting_semester = '0203FA'
-  print c_values
 
   all_courses_averaged_results = []
   for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
@@ -326,6 +332,14 @@ if __name__ == "__main__":
   plt.xscale('log')
   plt.legend()
   plt.show()
+
+
+  row_headings = ["Course Number", "Course Title", "Actual Enrollment", "Predicted Enrollment", "ROC Value"]
+  data = [
+    ['ENGR2320', 'Mechanics of Solids & Structures', 30, 26, .94]
+  ]
+  filename = "results/SP14_enrollment_prediction.csv"
+  write_to_csv_file(filename, row_headings, data)
 
 
 
