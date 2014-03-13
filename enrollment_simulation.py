@@ -82,7 +82,7 @@ def get_testing_sets(students, semester):
                 break
     return current_students, past_students
 
-def simulate_course(students, all_courses_list, professors, course, current_students, c_vals):
+def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=20):
     """
     Get expected enrollment for course
     """
@@ -100,13 +100,12 @@ def simulate_course(students, all_courses_list, professors, course, current_stud
         if len(x_vector) < 5 or len(x_test) < 1:
             continue
 
-        best_c, max_result, averaged_results = tune_c(x_vector, y_vector, all_courses_list, c_values=c_vals, num_iter=20)
+        best_c, max_result, averaged_results = tune_c(x_vector, y_vector, all_courses_list, c_values=c_vals, num_iter=num_iter)
         # print 'best c: %s'%best_c
         # print 'max_result:%s'%max_result
         max_rocs[current_semester] = max_result
 
         expected_enrollements[current_semester] = sum(expected_enrollment_for_course(x_vector, y_vector, x_test, best_c))
-        print 'enrollment for semester %s: %s'%(current_semester, enr_for_sem)
         
     total_expected = sum(expected_enrollements)
 

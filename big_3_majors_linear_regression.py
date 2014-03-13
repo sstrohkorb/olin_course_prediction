@@ -322,11 +322,12 @@ if __name__ == "__main__":
   data = []
 
   current_students, past_students = sim.get_testing_sets(students, '1314FA')
-  c_vals = np.logspace(-1, 5, num=30)
+  c_vals = np.logspace(-1, 5, num=5)
 
   # for course in spring_14_courses:
   for course in ['ENGR2320']:
-    sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals)
+    print course
+    sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=2)
     data.append([course] + sem_enr + [tot_enrolled] + max_rocs)
 
   write_to_csv_file(filename, row_headings, data)
