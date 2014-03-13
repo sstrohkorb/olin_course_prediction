@@ -91,12 +91,14 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
 
 # TODO: add major into the x_values, state assumptions being made (switching majors with the
 #       engineering concentration), and choose the majors we want to include based on #
-def create_course_enrollment_data(students, courses, professors, starting_semester, desired_course, current_semester, desired_semester):
+def create_course_enrollment_data(students, courses, professors, starting_semester, desired_course, current_semester, desired_semester, ending_semester=None):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input. 
       all_x_vectors represents the inputs to the linear regression model
       all_y_values represents the outputs to the linear regression model
   """
+  if ending_semester is None:
+    ending_semester = '9999'
 
   course_list = []
   for course in courses:
@@ -104,6 +106,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
 
   course_dict = {course_list[i]: i for i in range(len(course_list))}
   major_dict = {'Undeclared': 0, 'Mechanical Engineering': 1, "Electr'l & Computer Engr": 2, 'Engineering': 3}
+  semesters = make_semesters_dict()
 
   all_x_vectors = []
   all_y_values = []
@@ -127,11 +130,16 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
     x_vector[num_courses + major_dict[student.major_history[current_semester]]] = 1
     
     for course_offering in student.list_of_course_offerings:
+
       course_no = course_offering.course.course_number
       x_vector[course_dict[course_no]] = 1
 
+      # don't include courses from "the future"
+      if course_offering.semester > ending_semester:
+        x_vector[course_dict[course_no]] = 0
+
       # don't include courses that have had less than 100 students enrolled in them (ever)
-      if course_offering.course.total_number_of_students < 100:
+      elif course_offering.course.total_number_of_students < 100:
         x_vector[course_dict[course_no]] = 0
 
       # designate the students that actually did take the desired course during the desired semester
@@ -197,7 +205,10 @@ def compute_ROC_for_logistic(logistic, x_test, y_test):
   """
   prob = logistic.predict_proba(x_test)
 
-  sorted_probabilities = sorted(zip(prob, y_test), key=lambda x:x[0][1], reverse=True)
+  # sorted_probabilities = sorted(zip(prob, y_test), key=lambda x:x[0][1], reverse=True)
+
+  # prob started giving me a length 1 vector for some reason =/
+  sorted_probabilities = sorted(zip(prob, y_test), key=lambda x:x[0][0])
 
   y_values = []
   for (prob, y_value) in sorted_probabilities:
@@ -225,7 +236,7 @@ def compute_ROC(y_values):
     else: 
       true_pos.append(true_pos_total/total_pos)
     if total_neg == 0:
-      true_neg.append(0)
+      false_pos.append(0)
     else: 
       false_pos.append(false_pos_total/total_neg)
 
