@@ -32,6 +32,7 @@ class Student:
     semesters = {'FF':0, 'FR':1, 'SO1':2, 'SO2':3, 'JR1':4, 'JR2':5, 'SR1':6, 'SR2':7}
     sem_list = ['FF', 'FR', 'SO1', 'SO2', 'JR1', 'JR2', 'SR1', 'SR2']
     final = self.final_semester
+    # Set major to that of previous semester if no major set (for cases before final semester)
     for i in range(final):
       if i not in self.major_history:
         try:
