@@ -12,6 +12,7 @@ class Student:
     self.concentration = concentration
     self.academic_status = academic_status
     self.final_semester = None
+    self.first_semester = None
     # self.major_set = set()
     self.major_history = {}
 
@@ -27,6 +28,34 @@ class Student:
       if course_offering.student_semester_no > max_semester:
         max_semester = course_offering.student_semester_no
     self.final_semester = max_semester
+
+  def set_first_semester(self, semester_list):
+    start = 2
+    end = 14
+    semesters = {}
+    for i in range((end - start)):
+      temp_start = str(start + i)
+      temp_end = str(start + i + 1)
+      if len(temp_start) == 1:
+        temp_start = '0' + temp_start
+      if len(temp_end) == 1:
+        temp_end = '0' + temp_end
+      sem_fa = temp_start + temp_end + 'FA'
+      sem_sp = temp_start + temp_end + 'SP' 
+      semesters[sem_fa] = i * 2
+      semesters[sem_sp] = i * 2 + 1
+
+    min_semester_index = 100
+    for semester in semester_list:
+      if semesters[semester] < min_semester_index:
+        min_semester_index = semesters[semester]
+
+    min_semester_string = ''
+    for sem_str in semesters:
+      if semesters[sem_str] == min_semester_index:
+        min_semester_string = sem_str
+
+    self.first_semester = min_semester_string
 
   def set_major_history(self):
     semesters = {'FF':0, 'FR':1, 'SO1':2, 'SO2':3, 'JR1':4, 'JR2':5, 'SR1':6, 'SR2':7}

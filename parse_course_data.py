@@ -24,6 +24,7 @@ def get_course_data(filename):
     students = {} #id:Student
     courses = {} #course_number:Course
     professors = {}#name:Professor
+    semester_list_per_student = {}
 
     with open(filename,'rU') as f:
         contents = csv.reader(f)
@@ -343,12 +344,19 @@ def get_course_data(filename):
 
             students[stud_id].add_course_offering(course_offering)
 
+            if stud_id in semester_list_per_student:
+                if course_semester not in semester_list_per_student[stud_id]:
+                    semester_list_per_student[stud_id].append(course_semester)
+            else:
+                semester_list_per_student[stud_id] = [course_semester]
+
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
 
             students[stud_id].major_history[student_semester_no] = major
     
     for s in students:
+        students[s].set_first_semester(semester_list_per_student[s])
         students[s].set_final_semester()
         students[s].set_major_history()
 
