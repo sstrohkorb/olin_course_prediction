@@ -318,22 +318,24 @@ if __name__ == "__main__":
                   "predicted semester 6",
                   "predicted total",
                   "roc 0", "roc 1", "roc 2", "roc 3", "roc 4", "roc 5", "roc 6"]
-  filename = "results/SP14_enrollment_prediction.csv"
+  filename = "results/SP14_enrollment_prediction_after2006.csv"
   data = []
+  f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
+  f.writerow(row_headings)
 
   current_students, past_students = sim.get_testing_sets(students, '1314FA')
-  c_vals = np.logspace(-1, 4, num=20)
+  c_vals = np.logspace(-1, 4, num=15)
 
   for course in spring_14_courses:
   # for course in ['ENGR2320']:
     print course
     try:
-      sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=20)
-      data.append([course] + sem_enr + [tot_enrolled] + max_rocs)
+      sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=5)
+      f.writerow([course] + sem_enr + [tot_enrolled] + max_rocs)
     except:
       continue
 
-  write_to_csv_file(filename, row_headings, data)
+  # write_to_csv_file(filename, row_headings, data)
   #course_list = ['ENGR3420', 'ENGR2250', 'ENGR2510', 'ENGR3320', 'MTH3120', 'SCI2320', 'ENGR3370', 'SCI2199', 'ENGR3380']
   #course_names = ['AnalDig', 'UOCD', 'SoftDes', 'MechSolids', 'PDEs', 'OChem', 'Controls', 'Relativity', 'DFM']
   #course_semester = ['JR', 'SO', 'SO', 'SO', 'JR', 'SO', 'SR', 'SO', 'SR']

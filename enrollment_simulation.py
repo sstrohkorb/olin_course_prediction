@@ -86,7 +86,8 @@ def simulate_course(students, all_courses_list, professors, course, current_stud
     """
     Get expected enrollment for course
     """
-    starting_semester = '0203FA'
+    # starting_semester = '0203FA'
+    starting_semester = '0607FA'
     end_sem = '1314FA'
     expected_enrollements = [0] * 7
     max_rocs = [0] * 7
