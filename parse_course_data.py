@@ -6,41 +6,60 @@ from Graduating_Class import *
 from Major import *
 from Professor import *
 
-# ['Academic Status Code',
-#  'Degree Grant Year',
-#  'Student ID Number',
-#  'AcadYr_Session',
-#  'Gender Code',
-#  'Session Classification Code',
-#  'Session Major 1 Description',
-#  'Concentration 1 Description',
-#  'Course Work Course Number',
-#  'Section Number',
-#  'Course Work Course Title',
-#  'Section Title (Actual)',
-#  'Faculty Full Name (Last, First)']
+def make_semesters_dict(start_year, end_year):
+    """
+    Maps the semester titles to numbers, for easier use in determining the order of semesters.
+    The dictionary looks like this: 
+        {'0203FA': 0, '0203SP': 1, '0304FA': 2, ... , '1314SP': 23}
+    The start_year and end_year determine the beginning and end points of the dictionary.
+    """
+    start = start_year - 2000
+    end = end_year - 2000
+    semesters = {}
+    for i in range((end - start)):
+        temp_start = str(start + i)
+        temp_end = str(start + i + 1)
+        if len(temp_start) == 1:
+            temp_start = '0' + temp_start
+        if len(temp_end) == 1:
+            temp_end = '0' + temp_end
+        sem_fa = temp_start + temp_end + 'FA'
+        sem_sp = temp_start + temp_end + 'SP' 
+        semesters[sem_fa] = i * 2
+        semesters[sem_sp] = i * 2 + 1
+    return semesters
+
 
 def get_course_data(filename):
-    students = {} #id:Student
-    courses = {} #course_number:Course
-    professors = {}#name:Professor
+    """
+    Parses all of the course data from the specified filname and returns a list of 3 dictionarires: students,
+    courses, and professors from which the data can be accessed and used. 
+    This method assumes that the data is in a csv format and has the following column headings in this specific
+    order:
+        'Academic Status Code'
+        'Degree Grant Year'
+        'Student ID Number'
+        'AcadYr_Session'
+        'Gender Code'
+        'Session Classification Code'
+        'Session Major 1 Description'
+        'Concentration 1 Description'
+        'Course Work Course Number'
+        'Section Number'
+        'Course Work Course Title'
+        'Section Title (Actual)'
+        'Faculty Full Name (Last, First)'
+    """
+    students = {}       # key = id, value = Student
+    courses = {}        # key = course_number, value = Course
+    professors = {}     # key = name, value = Professor
     semester_list_per_student = {}
     validation_courses = {}
 
-    start = 2
-    end = 14
-    semesters = {}
-    for i in range((end - start)):
-      temp_start = str(start + i)
-      temp_end = str(start + i + 1)
-      if len(temp_start) == 1:
-        temp_start = '0' + temp_start
-      if len(temp_end) == 1:
-        temp_end = '0' + temp_end
-      sem_fa = temp_start + temp_end + 'FA'
-      sem_sp = temp_start + temp_end + 'SP' 
-      semesters[sem_fa] = i * 2
-      semesters[sem_sp] = i * 2 + 1
+    # Setting the min and max years we're looking at, to set up the semesters dict
+    # the min and max years will not necessarily be 2002 and 2014, this is just the minimum range
+    min_year = 2002
+    max_year = 2014
 
     with open(filename,'rU') as f:
         contents = csv.reader(f)
@@ -377,7 +396,15 @@ def get_course_data(filename):
                 students[stud_id].major = major
 
             students[stud_id].major_history[student_semester_no] = major
-    
+
+            # Setting the min and max years based on the course_semester data
+            if int(course_semester[:2]) < (min_year - 2000):
+                min_year = 2000 + int(course_semester[:2])
+            elif int(course_semester[2:4]) > (max_year - 2000): 
+                max_year = 2000 + int(course_semester[2:4])
+
+    semesters = make_semesters_dict(min_year, max_year)
+
     for s in students:
         students[s].set_first_semester(semester_list_per_student[s], semesters)
         students[s].set_final_semester()
@@ -404,7 +431,7 @@ def get_course_data(filename):
     return [students, courses, professors]
 
 
-
+get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
 
 
 
