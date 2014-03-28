@@ -79,9 +79,11 @@ def get_course_data(filename):
             section_title = row[11].strip()
             professor_name = row[12].strip()
 
+            # Get rid of the header row with column titles
             if academic_status == 'Academic Status Code':
                 continue
 
+            # list of courses we don't want to include in our model, for various reasons listed below
             non_included_courses = [
                 'ENGR3520A',    # Project that went along with FOCS one year
                 'OIE1000',      # OIE
@@ -103,15 +105,16 @@ def get_course_data(filename):
                 'ICB1',         # Lecture Component of ICB1, already accounted for in course numbers
                 'MTH3130'       # Mathematical Analysis (2 cr) - 16 people - doesn't fit what came after well
             ]
-            # Don't include Lab classes or classes we don't want to include
+            # Don't include the courses in the list above as well as lab classes and AHS Cap Pre-reg
             if ' L' in course_number or course_number in non_included_courses or course_title == 'AHS CapstoneSpring Pre-registration':
                 continue
 
             
-            # Combine the course_semester and year into one meaningful variable that describes
-            # what the student's standing is at the time they take a course offering by semester
-            # number (from 0 to 7)
+            """ Combine the course_semester and year into one meaningful variable that describes
+                what the student's standing is at the time they take a course offering by semester
+                number (from 0 to 7) """
 
+            # Sometimes the freshman first semester is labeled as 'TF', change it to 'FF', which is more frequently used
             if student_semester_str == 'TF': student_semester_str = 'FF'
             
             student_semester_no = 0     # 'FF'
@@ -127,16 +130,16 @@ def get_course_data(filename):
 
             if 'SP' in course_semester: student_semester_no += 1
 
-            # Cleaning course data by setting equivalent course information
 
-            # AHS vs. AHSE problem 
+            
+            """ Cleaning course data by setting equivalent course information """
+
+            # AHS vs. AHSE problem, change everything to AHSE
             if 'AHS' in course_number and 'AHSE' not in course_number:
                 course_number = course_number[:3] + 'E' + course_number[3:]
 
-            # keys = course #
-            # values = equivalent course #
-            equivalent_courses = {}
-
+            # Entried in classes_to_convert contain pairs of course #s (left) to convert to equivalent course #s (right)
+            # The SECOND course # should be the one that you want the FIRST course # to become
             classes_to_convert = [
                 ('FND2490', 'ENGR2250'),    # FND UOCD
                 ('FND1310', 'MTH1110'),     # FND Calculus - 2006
@@ -215,13 +218,19 @@ def get_course_data(filename):
                 ('ELE1025', 'AHSE1122'),    # Wired Ensemble
                 ('ELE1020', 'AHSE1122')     # Wired Ensemble
             ]
+
+            equivalent_courses = {} # keys = course #, values = equivalent course #
+            
+            # convert the list above to a dictionary
             for old, current in classes_to_convert:
                 equivalent_courses[old] = current
 
+            # Do the actual conversion of the course #s
             if course_number in equivalent_courses:
                 course_number = equivalent_courses[course_number]
             
-            # SPECIAL MANIPULATIONS
+            
+            """ SPECIAL MANIPULATIONS """
 
             # Digital Signal Processing used to be a Speical Topics
             if course_number == 'ENGR3499B' and 'Digital Signal Processing' in section_title:
