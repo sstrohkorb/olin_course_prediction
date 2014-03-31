@@ -238,6 +238,7 @@ def get_course_data(filename):
                 course_title = 'Digital Signal Processing'
                 section_title = ''
 
+            # Preferred title for AHSE1102
             elif course_number == 'AHSE1102':
                 course_title = 'Arts and Humanities: Self-Explored in Art and Philosp'
 
@@ -287,6 +288,8 @@ def get_course_data(filename):
                 course_title = 'Modeling and Control'
 
             # Arts, Humanities, Social ScienceFoundation Topic
+            # There were multiple courses with the same number but a different course, this corrects for that
+            # creating new course numbers for courses that have a different subject but the same course number
             elif course_number == 'AHSE1199':
                 # Art Since 1945: Movmt Theme Cntx
                 if 'Art Since 1945' in section_title:
@@ -367,12 +370,18 @@ def get_course_data(filename):
             else:
                 num_iterations = 1
 
+            # Used to determine the number of people in each course for the 1314SP semester
+            # Does not do anything for parsing the course data
             if course_semester == '1314SP':
                 if course_number not in validation_courses:
                     validation_courses[course_number] = [course_number, course_title, section_title, professor_name, 1]
                 else:
                     validation_courses[course_number][4] += 1
 
+            # If a course number had more than one course assciated with it, the number of iterations below
+            # will be two
+
+            # This section puts the course information into our defined objects
             for i in range(num_iterations):
                 if num_iterations == 2:
                     course_number = course_numbers[i]
@@ -388,19 +397,23 @@ def get_course_data(filename):
                 course_offering.enrollment += 1
 
 
+            # Add student to the list of students we'll return
             if stud_id not in students:
                 #(self, ID, gender, graduating_class, major, academic_status)
                 new_student = Student(stud_id, gender, grad_year, major, academic_status, concentration)
                 students[stud_id] = new_student
 
+            # add the course to the student's list of courses they've taken
             students[stud_id].add_course_offering(course_offering)
 
+            # build up the list of all semesters that the student took courses in 
             if stud_id in semester_list_per_student:
                 if course_semester not in semester_list_per_student[stud_id]:
                     semester_list_per_student[stud_id].append(course_semester)
             else:
                 semester_list_per_student[stud_id] = [course_semester]
 
+            # Set the students' major
             if students[stud_id].major == 'Undeclared' and major != 'Undeclared':
                 students[stud_id].major = major
 
