@@ -5,7 +5,17 @@ import matplotlib.pyplot as plt
 from sklearn import datasets
 from sklearn import linear_model
 
-def tune_c(x_vector, y_vector, all_courses_list, c_values=None, num_iter=20):
+def tune_c(x_vector, y_vector, all_courses_list, c_values=None, num_iter=100):
+    """
+    Finds the c value that yields the maximal area under the ROC for a given
+    x_vector and y_vector
+    Parameters:
+        x_vector : list of lists containing attribute data for each student
+        y_vector : list of classification of each student
+        all_courses_list: this is the list of all courses used to generate the data
+        c_values: list of c values to sweep, default is np.logspace(-1, 4, num=20)
+        num_iter: number of times area under the roc is computed for each c value
+    """
 
     averaged_results = []
 
@@ -13,11 +23,7 @@ def tune_c(x_vector, y_vector, all_courses_list, c_values=None, num_iter=20):
         c_values = np.logspace(-1, 4, num=20)
 
     for c_value in c_values:
-      temp_list = []
-      for i in range(num_iter):
-        [actual_result, description] = bmlg.prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, 20, c_value)
-        temp_list.append(actual_result)
-      averaged_result = sum(temp_list)/len(temp_list)
+      [averaged_result, description] = bmlg.prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, num_iter, c_value)
       averaged_results.append(averaged_result)
 
     max_result = max(averaged_results)
@@ -82,7 +88,7 @@ def get_testing_sets(students, semester):
                 break
     return current_students, past_students
 
-def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=20):
+def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=100):
     """
     Get expected enrollment for course
     """
