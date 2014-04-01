@@ -318,7 +318,7 @@ def initialize_data():
 
   return students, courses, professors, semesters, all_courses_list
 
-def run_sim_all_courses(filename, num_iter=100):
+def run_sim(filename, num_iter=100, sim_courses=None):
   """
   predict course enrollment and write predictions and ROC values to a csv file
   parameters:
@@ -326,7 +326,7 @@ def run_sim_all_courses(filename, num_iter=100):
     num_iter: (int) number of times logistic is made for a given case when determining
       the best c value
   """
-  spring_14_courses = ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
+  spring_14_courses = sim_courses or ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
     'ENGR3499', 'ENGR3299', 'ENGR3810', 'MTH2140', 'SCI2214', 'ENGR1330', 'ENGR2350', 'MTH3170', 'MTH2188A', 
     'ENGR4190', 'AHSE3190', 'ENGR2599', 'AHSE3199', 'ENGR2410', 'MTH2199', 'ENGR2141', 'ENGR3370', 'SCI2320', 
     'AHSE0112', 'ENGR2510', 'SCI1410', 'ENGR3525', 'SUST3301', 'ENGR4290', 'SCI3320', 'ENGR3620', 'ENGR3820', 
@@ -337,6 +337,9 @@ def run_sim_all_courses(filename, num_iter=100):
   students, courses, professors, semesters, all_courses_list = initialize_data()
 
   row_headings = ["Course Number",
+                  "predicted total",
+                  "weighted arithmetic average roc",
+                  "weighted geometric average roc",
                   "predicted semester 0",
                   "predicted semester 1",
                   "predicted semester 2",
@@ -344,7 +347,6 @@ def run_sim_all_courses(filename, num_iter=100):
                   "predicted semester 4",
                   "predicted semester 5",
                   "predicted semester 6",
-                  "predicted total",
                   "roc 0", "roc 1", "roc 2", "roc 3", "roc 4", "roc 5", "roc 6"]
   data = []
   f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
@@ -356,11 +358,8 @@ def run_sim_all_courses(filename, num_iter=100):
   # skip courses that cause errors
   for course in spring_14_courses:
     print course
-    try:
-      sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
-      f.writerow([course] + sem_enr + [tot_enrolled] + max_rocs)
-    except:
-      continue
+    tot_enrolled, avg_roc_arith, avg_roc_geo, sem_enr, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
+    f.writerow([course, tot_enrolled, avg_roc_arith, avg_roc_geo] + sem_enr + max_rocs)
 
 def test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester):
   """
@@ -420,7 +419,7 @@ if __name__ == "__main__":
 
   # test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester)
 
-  run_sim_all_courses('test.csv', num_iter=3)
+  run_sim('test.csv', num_iter=3, sim_courses=['ENGR3420'])
 
 
 

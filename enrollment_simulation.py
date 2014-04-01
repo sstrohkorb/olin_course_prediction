@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
 from sklearn import linear_model
+import math
 
 def tune_c(x_vector, y_vector, all_courses_list, c_values=None, num_iter=100):
     """
@@ -115,8 +116,18 @@ def simulate_course(students, all_courses_list, professors, course, current_stud
         expected_enrollements[current_semester] = sum(expected_enrollment_for_course(x_vector, y_vector, x_test, best_c))
         
     total_expected = sum(expected_enrollements)
+    weighted_avg_roc_arithmetic = sum(map(lambda x,y: x*y/total_expected, max_rocs, expected_enrollements))
+    weighted_avg_roc_geometric = math.pow(
+        reduce(lambda x,y: x*y,
+            map(math.pow,
+                max_rocs, expected_enrollements)
+        ), 1.0/total_expected)
+    print weighted_avg_roc_geometric
 
-    return expected_enrollements, total_expected, max_rocs
+    map_res = map(math.pow, max_rocs, expected_enrollements)
+    print map_res
+
+    return total_expected, weighted_avg_roc_arithmetic, weighted_avg_roc_geometric, expected_enrollements, max_rocs
 
 
 if __name__ == '__main__':
