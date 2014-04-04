@@ -6,7 +6,7 @@ class Student:
   def __init__(self, ID, gender, graduating_class, major, concentration, academic_status):
     self.ID = ID
     self.gender = gender
-    self.list_of_course_offerings = []
+    self.list_of_course_offerings = x = [[] for i in range(8)]
     self.graduating_class = graduating_class
     self.major = major
     self.concentration = concentration
@@ -19,14 +19,14 @@ class Student:
   def __str__(self):
     return self.ID + ", " + self.gender + ", " + self.graduating_class + ", " + self.major
 
-  def add_course_offering(self, course_offering):
-  	self.list_of_course_offerings.append(course_offering)
+  def add_course_offering(self, course_offering, student_semester_no):
+  	self.list_of_course_offerings[student_semester_no].append(course_offering)
 
   def set_final_semester(self):
     max_semester = 0
-    for course_offering in self.list_of_course_offerings:
-      if course_offering.student_semester_no > max_semester:
-        max_semester = course_offering.student_semester_no
+    for i in range(len(self.list_of_course_offerings)):
+      if self.list_of_course_offerings[i]:
+        max_semester = i
     self.final_semester = max_semester
 
   def set_first_semester(self, semester_list, semesters):

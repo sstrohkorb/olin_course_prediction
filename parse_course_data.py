@@ -61,10 +61,12 @@ def get_course_data(filename):
     min_year = 2002
     max_year = 2014
 
+    o = 0
     with open(filename,'rU') as f:
         contents = csv.reader(f)
-        matrix = list()
         for row in contents:
+            print o
+            o += 1
             academic_status = row[0].strip()
             grad_year = row[1].strip()
             stud_id = row[2].strip()
@@ -388,13 +390,18 @@ def get_course_data(filename):
                     course_title = course_titles[i]
                     section_title = ''
 
+                # Course
                 courses[course_number] = courses.get(course_number, Course(course_title, section_title, course_number))
                 course = courses[course_number]
                 course.total_number_of_students += 1
-                professors[professor_name] = professors.get(professor_name, Professor(professor_name))
-                course_offering = Course_Offering(course_semester, student_semester_no, section_no, course)
-                course_offering.set_professor(professors[professor_name])
+
+                # Course Offering
+                course_offering = course.add_course_offering(course_semester)
                 course_offering.enrollment += 1
+
+                # Professor
+                professors[professor_name] = professors.get(professor_name, Professor(professor_name))
+                course_offering.add_professor(professors[professor_name])
 
 
             # Add student to the list of students we'll return
@@ -403,8 +410,8 @@ def get_course_data(filename):
                 new_student = Student(stud_id, gender, grad_year, major, academic_status, concentration)
                 students[stud_id] = new_student
 
-            # add the course to the student's list of courses they've taken
-            students[stud_id].add_course_offering(course_offering)
+            # add the course offering to the student's list of courses they've taken
+            students[stud_id].add_course_offering(course_offering, student_semester_no)
 
             # build up the list of all semesters that the student took courses in 
             if stud_id in semester_list_per_student:
@@ -453,7 +460,9 @@ def get_course_data(filename):
     return [students, courses, professors]
 
 
-get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+for course_no in courses:
+    print courses[course_no]
 
 
 
