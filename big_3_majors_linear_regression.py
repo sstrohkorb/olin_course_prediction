@@ -9,6 +9,10 @@ from random import *
 
 
 def make_semesters_dict():
+  """
+  generate a dictionary mapping the string representation of a year semester (eg 0405FA)
+  to an int representing the number of semesters since Olin's inception
+  """
   start = 2
   end = 14
   semesters = {}
@@ -94,30 +98,47 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
 #       engineering concentration), and choose the majors we want to include based on #
 def create_course_enrollment_data(students, courses, professors, starting_semester, desired_course, current_semester, desired_semester, ending_semester=None):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
-      on the enrollment data that is input. 
-      all_x_vectors represents the inputs to the linear regression model
-      all_y_values represents the outputs to the linear regression model
+      on the enrollment data that is input.
+      parameters:
+        students: (dict) dictionary mapping student id to student object representing all students.
+        courses: (list of tuples) list of courses being considered of form (course number, course title)
+        professors: (not currently in use) (dict) dictionary mapping professor name to Professor object
+        starting_semester: (string) semester at which the data is to begin (eg '0708FA')
+          this means using only data from students who began attending on or after starting_semester
+        desired_course: (string) the course number of the considered course
+        current_semester: (int) integer representing the current semester of the student
+        desired_semester: (int) integer representing the predicted semester of the student
+        ending_semester: (string) semester at which the data is to end (eg '0708FA')
+      return values:
+        all_x_vectors represents the inputs to the linear regression model
+        all_y_values represents the outputs to the linear regression model
   """
+  # if ending semester is not set, end semester is infinity
+  # this could probably be made better
   if ending_semester is None:
     ending_semester = '9999'
 
+  # list of course numbers
   course_list = []
   for course in courses:
     course_list.append(course[0])
 
+  # dict mapping course numbers to index in course_list
   course_dict = {course_list[i]: i for i in range(len(course_list))}
   major_dict = {'Undeclared': 0, 'Mechanical Engineering': 1, "Electr'l & Computer Engr": 2, 'Engineering': 3}
+  
+  # dict mapping year semsester to number of semesters since olin's inception
   semesters = make_semesters_dict()
 
   all_x_vectors = []
   all_y_values = []
 
-  for student_id in students:
-    student = students[student_id]
+  for student_id, student in students.items():
 
     if student.final_semester < desired_semester:
       # student did not make it to desired_semester- discard student
       continue
+
     if semesters[student.first_semester] < semesters[starting_semester]:
       # if the student started at Olin before the input starting_semester, discard student
       continue
@@ -126,6 +147,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
     x_vector = [0]*(num_courses + len(major_dict))
     y_value = 0
 
+    # flag indicating that student should be discarded if set to True
     drop_student = False
 
     # Set major for current semester
@@ -134,6 +156,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
     for course_offering in student.list_of_course_offerings:
 
       # student did not reach desired_semester as of end_semester
+      # TODO: replace with a better check
       if course_offering.semester == ending_semester:
         if course_offering.student_semester_no < desired_semester:
           drop_student = True
@@ -156,6 +179,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
 
       # if the course is in a semester beyond what we're considering, set the y value to 0
       # (not including the 'future' information in our calculations)
+      # TODO: change this when course_offering changes
       elif course_offering.student_semester_no > current_semester:
         x_vector[course_dict[course_no]] = 0
 
@@ -306,8 +330,8 @@ def initialize_data():
   Return values:
     students: dict of students. {student id: Student object}
     courses: dict of courses. {course number: Course object}
-    semesters: dict of semesters, mapping string representation of semester
-               to int representation
+    semesters: dict of semesters, mapping string representation of semester year
+               to int
     all_courses_list: list of tuples (course number, course title)
   """
   [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
@@ -318,7 +342,7 @@ def initialize_data():
 
   return students, courses, professors, semesters, all_courses_list
 
-def run_sim(filename, num_iter=100, sim_courses=None):
+def run_sim(filename, num_iter=100, sim_courses=None, start_sem='0607FA', end_sem='1314FA', students=None, courses=None, professors=None, semesters=None, all_courses_list=None):
   """
   predict course enrollment and write predictions and ROC values to a csv file
   parameters:
@@ -334,12 +358,13 @@ def run_sim(filename, num_iter=100, sim_courses=None):
     'ENGR3392', 'AHSE1500', 'ENGR1121', 'SCI1130', 'ENGR3415', 'AHSE2199', 'AHSE2199B', 'AHSE2199A', 'SCI1199B', 
     'ENGR2210', 'ENGR2250', 'ENGR2420', 'ENGR3260', 'SCI2140']
 
-  students, courses, professors, semesters, all_courses_list = initialize_data()
+
+  if not students:
+    students, courses, professors, semesters, all_courses_list = initialize_data()
 
   row_headings = ["Course Number",
                   "predicted total",
                   "weighted arithmetic average roc",
-                  "weighted geometric average roc",
                   "predicted semester 0",
                   "predicted semester 1",
                   "predicted semester 2",
@@ -352,14 +377,14 @@ def run_sim(filename, num_iter=100, sim_courses=None):
   f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
   f.writerow(row_headings)
 
-  current_students, past_students = sim.get_testing_sets(students, '1314FA')
+  current_students, past_students = sim.get_testing_sets(students, end_sem)
   c_vals = np.logspace(-1, 4, num=15)
 
   # skip courses that cause errors
   for course in spring_14_courses:
     print course
-    tot_enrolled, avg_roc_arith, avg_roc_geo, sem_enr, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
-    f.writerow([course, tot_enrolled, avg_roc_arith, avg_roc_geo] + sem_enr + max_rocs)
+    tot_enrolled, avg_roc_arith, sem_enr, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
+    f.writerow([course, tot_enrolled, avg_roc_arith] + sem_enr + max_rocs)
 
 def test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester):
   """
@@ -419,8 +444,22 @@ if __name__ == "__main__":
 
   # test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester)
 
-  run_sim('test.csv', num_iter=3, sim_courses=['ENGR3420'])
+  # run_sim('test.csv', num_iter=3, sim_courses=['ENGR3420'])
+  students, courses, professors, semesters, all_courses_list = initialize_data()
+  all_course_numbers = [x[0] for x in all_courses_list]
 
+  start_sems = ['0203FA','0203SP', '0304FA','0304SP', '0405FA','0405SP', '0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
+  end_sems = ['0708FA', '0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+  # start_sems = ['0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
+  # end_sems = ['1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+
+  for start, end in zip(reversed(start_sems), reversed(end_sems)):
+    filename = 'results/simulate_%s_%s.csv'%(start, end)
+    print 'simulating %s - %s'%(start, end)
+    try:
+      run_sim(filename, num_iter=50, sim_courses=all_course_numbers, start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
+    except:
+      print 'simulation failed: %s - %s'%(start, end)
 
 
 

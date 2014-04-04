@@ -89,13 +89,12 @@ def get_testing_sets(students, semester):
                 break
     return current_students, past_students
 
-def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=100):
+def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=100, start_sem='0607FA', end_sem='1314FA'):
     """
     Get expected enrollment for course
     """
     # starting_semester = '0203FA'
-    starting_semester = '0607FA'
-    end_sem = '1314FA'
+    starting_semester = start_sem
     expected_enrollements = [0] * 7
     max_rocs = [0] * 7
     #TODO: only look at spring semesters, weight c-values?
@@ -116,18 +115,12 @@ def simulate_course(students, all_courses_list, professors, course, current_stud
         expected_enrollements[current_semester] = sum(expected_enrollment_for_course(x_vector, y_vector, x_test, best_c))
         
     total_expected = sum(expected_enrollements)
-    weighted_avg_roc_arithmetic = sum(map(lambda x,y: x*y/total_expected, max_rocs, expected_enrollements))
-    weighted_avg_roc_geometric = math.pow(
-        reduce(lambda x,y: x*y,
-            map(math.pow,
-                max_rocs, expected_enrollements)
-        ), 1.0/total_expected)
-    print weighted_avg_roc_geometric
+    try:
+        weighted_avg_roc = sum(map(lambda x,y: x*y, max_rocs, expected_enrollements))/ total_expected
+    except ZeroDivisionError:
+        weighted_avg_roc = 0
 
-    map_res = map(math.pow, max_rocs, expected_enrollements)
-    print map_res
-
-    return total_expected, weighted_avg_roc_arithmetic, weighted_avg_roc_geometric, expected_enrollements, max_rocs
+    return total_expected, weighted_avg_roc, expected_enrollements, max_rocs
 
 
 if __name__ == '__main__':
