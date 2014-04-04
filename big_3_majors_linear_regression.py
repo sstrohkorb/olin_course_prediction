@@ -226,7 +226,8 @@ def compute_ROC_for_logistic(logistic, x_test, y_test):
   return area
 
 def compute_ROC(y_values):
-
+  """given true y values sorted by assigned probability, create ROC and compute area underneath
+  """
   true_pos = []
   false_pos = []
   true_pos_total = 0
@@ -286,29 +287,59 @@ def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, numbe
   
   return [actual_result, temp_str]
 
-
 def write_to_csv_file(filename, row_headings, data):
+  """
+  write csv file
+  parameters:
+    filename: (string) name of file to write to
+    row_headings: (list) list of headings
+    data: (list of lists) data to write
+  """
   f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
   f.writerow(row_headings)
   for data_entry in data:
     f.writerow(data_entry)
 
-
-if __name__ == "__main__":
+def initialize_data():
+  """
+  One easy function to get all the data you need
+  Return values:
+    students: dict of students. {student id: Student object}
+    courses: dict of courses. {course number: Course object}
+    semesters: dict of semesters, mapping string representation of semester
+               to int representation
+    all_courses_list: list of tuples (course number, course title)
+  """
   [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
   semesters = make_semesters_dict()
-  spring_14_courses = ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
+  all_courses_list = []
+  for course in courses: 
+    all_courses_list.append((courses[course].course_number, courses[course].title))
+
+  return students, courses, professors, semesters, all_courses_list
+
+def run_sim(filename, num_iter=100, sim_courses=None):
+  """
+  predict course enrollment and write predictions and ROC values to a csv file
+  parameters:
+    filename: (string) name of file to write results to
+    num_iter: (int) number of times logistic is made for a given case when determining
+      the best c value
+  """
+  spring_14_courses = sim_courses or ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
     'ENGR3499', 'ENGR3299', 'ENGR3810', 'MTH2140', 'SCI2214', 'ENGR1330', 'ENGR2350', 'MTH3170', 'MTH2188A', 
     'ENGR4190', 'AHSE3190', 'ENGR2599', 'AHSE3199', 'ENGR2410', 'MTH2199', 'ENGR2141', 'ENGR3370', 'SCI2320', 
     'AHSE0112', 'ENGR2510', 'SCI1410', 'ENGR3525', 'SUST3301', 'ENGR4290', 'SCI3320', 'ENGR3620', 'ENGR3820', 
     'ENGR2330', 'SCI2130B', 'ENGR3199', 'ENGR3399', 'SCI1310', 'MTH3120', 'AHSE4590', 'SCI1210', 'ENGR2199C', 
     'ENGR3392', 'AHSE1500', 'ENGR1121', 'SCI1130', 'ENGR3415', 'AHSE2199', 'AHSE2199B', 'AHSE2199A', 'SCI1199B', 
     'ENGR2210', 'ENGR2250', 'ENGR2420', 'ENGR3260', 'SCI2140']
-  all_courses_list = []
-  for course in courses: 
-    all_courses_list.append([courses[course].course_number, courses[course].title])
+
+  students, courses, professors, semesters, all_courses_list = initialize_data()
 
   row_headings = ["Course Number",
+                  "predicted total",
+                  "weighted arithmetic average roc",
+                  "weighted geometric average roc",
                   "predicted semester 0",
                   "predicted semester 1",
                   "predicted semester 2",
@@ -316,9 +347,7 @@ if __name__ == "__main__":
                   "predicted semester 4",
                   "predicted semester 5",
                   "predicted semester 6",
-                  "predicted total",
                   "roc 0", "roc 1", "roc 2", "roc 3", "roc 4", "roc 5", "roc 6"]
-  filename = "results/SP14_enrollment_prediction_after2006.csv"
   data = []
   f = csv.writer(open(filename,"w"), delimiter=',',quoting=csv.QUOTE_ALL)
   f.writerow(row_headings)
@@ -326,16 +355,45 @@ if __name__ == "__main__":
   current_students, past_students = sim.get_testing_sets(students, '1314FA')
   c_vals = np.logspace(-1, 4, num=15)
 
+  # skip courses that cause errors
   for course in spring_14_courses:
-  # for course in ['ENGR2320']:
     print course
-    try:
-      sem_enr, tot_enrolled, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=5)
-      f.writerow([course] + sem_enr + [tot_enrolled] + max_rocs)
-    except:
-      continue
+    tot_enrolled, avg_roc_arith, avg_roc_geo, sem_enr, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
+    f.writerow([course, tot_enrolled, avg_roc_arith, avg_roc_geo] + sem_enr + max_rocs)
 
-  # write_to_csv_file(filename, row_headings, data)
+def test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester):
+  """
+  This is a testing function that sweeps through a range of c values and plots the results
+  """
+  students, courses, professors, semesters, all_courses_list = initialize_data()
+
+  all_courses_averaged_results = []
+  for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
+    [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester, ending_semester='1314FA')
+    frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, current_semester, desired_semester)
+    num_students_taken_course_ever = courses[course].total_number_of_students
+    averaged_results = []
+    for c_value in c_values:
+      temp_list = []
+      for i in range(3):
+        [actual_result, description] = prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, 20, c_value)
+        temp_list.append(actual_result)
+      averaged_result = sum(temp_list)/len(temp_list)
+      averaged_results.append(averaged_result)
+      print '%s: %s %s - %s' %(course_name, current_semester, desired_semester, c_value)
+      print "Our algorithm: %.4f" % (averaged_result)
+    all_courses_averaged_results.append(averaged_results)
+
+  for i in range(len(course_list)):
+    label = '%s: %s-%s' %(course_names[i], current_semesters[i], course_semester[i])
+    plt.plot(c_values, all_courses_averaged_results[i], label=label)
+  plt.xscale('log')
+  plt.legend()
+  plt.show()
+
+
+if __name__ == "__main__":
+
   #course_list = ['ENGR3420', 'ENGR2250', 'ENGR2510', 'ENGR3320', 'MTH3120', 'SCI2320', 'ENGR3370', 'SCI2199', 'ENGR3380']
   #course_names = ['AnalDig', 'UOCD', 'SoftDes', 'MechSolids', 'PDEs', 'OChem', 'Controls', 'Relativity', 'DFM']
   #course_semester = ['JR', 'SO', 'SO', 'SO', 'JR', 'SO', 'SR', 'SO', 'SR']
@@ -359,42 +417,9 @@ if __name__ == "__main__":
   # c_values = np.logspace(-1, 4, num=10)
   # starting_semester = '0203FA'
 
-  # all_courses_averaged_results = []
-  # for course, course_name, desired_semester, current_semester in zip(course_list, course_names, course_semester, current_semesters):
-  #   [x_vector, y_vector] = create_course_enrollment_data(students, all_courses_list, professors, starting_semester, course, current_semester, desired_semester, ending_semester='1314FA')
-  #   frequency_baseline = freuqency_based_prediction_strength(students, all_courses_list, professors, course, current_semester, desired_semester)
-  #   num_students_taken_course_ever = courses[course].total_number_of_students
-  #   averaged_results = []
-  #   for c_value in c_values:
-  #     temp_list = []
-  #     for i in range(3):
-  #       [actual_result, description] = prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, 20, c_value)
-  #       temp_list.append(actual_result)
-  #     averaged_result = sum(temp_list)/len(temp_list)
-  #     averaged_results.append(averaged_result)
-  #     print '%s: %s %s - %s' %(course_name, current_semester, desired_semester, c_value)
-  #     #print "Total: " + str(num_students_taken_course_ever)
-  #     #print "Baseline:      %.4f" % frequency_baseline
-  #     #print description
-  #     print "Our algorithm: %.4f" % (averaged_result)
-  #   all_courses_averaged_results.append(averaged_results)
+  # test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester)
 
-  # for i in range(len(course_list)):
-  #   label = '%s: %s-%s' %(course_names[i], current_semesters[i], course_semester[i])
-  #   plt.plot(c_values, all_courses_averaged_results[i], label=label)
-  # plt.xscale('log')
-  # plt.legend()
-  # plt.show()
-
-
-  # row_headings = ["Course Number", "Course Title", "Actual Enrollment", "Predicted Enrollment", "ROC Value"]
-  # data = [
-  #   ['ENGR2320', 'Mechanics of Solids & Structures', 30, 26, .94]
-  # ]
-  # filename = "results/SP14_enrollment_prediction.csv"
-  # write_to_csv_file(filename, row_headings, data)
-
-
+  run_sim('test.csv', num_iter=3, sim_courses=['ENGR3420'])
 
 
 
