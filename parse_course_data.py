@@ -5,6 +5,7 @@ from Course_Offering import *
 from Graduating_Class import *
 from Major import *
 from Professor import *
+from parse_prereg_data import *
 
 def make_semesters_dict(start_year, end_year):
     """
@@ -61,12 +62,9 @@ def get_course_data(filename):
     min_year = 2002
     max_year = 2014
 
-    o = 0
     with open(filename,'rU') as f:
         contents = csv.reader(f)
         for row in contents:
-            print o
-            o += 1
             academic_status = row[0].strip()
             grad_year = row[1].strip()
             stud_id = row[2].strip()
@@ -185,7 +183,6 @@ def get_course_data(filename):
                 ('ENGR3812', 'SCI3120'),    # Solid State Physics
                 ('SCI1121A', 'SCI1121'),    # E&M
                 ('SCI1120', 'SCI1121'),     # E&M
-                ('ENGR3290', 'ENGR4290'),   # ADE
                 ('ENGR1120', 'ENGR1121'),   # Real World Measurements
                 ('ENGR3380', 'ENGR3260'),   # DFM
                 ('ENGR3340', 'ENGR2340'),   # Dynamics
@@ -372,14 +369,6 @@ def get_course_data(filename):
             else:
                 num_iterations = 1
 
-            # Used to determine the number of people in each course for the 1314SP semester
-            # Does not do anything for parsing the course data
-            if course_semester == '1314SP':
-                if course_number not in validation_courses:
-                    validation_courses[course_number] = [course_number, course_title, section_title, professor_name, 1]
-                else:
-                    validation_courses[course_number][4] += 1
-
             # If a course number had more than one course assciated with it, the number of iterations below
             # will be two
 
@@ -439,30 +428,28 @@ def get_course_data(filename):
         students[s].set_final_semester()
         students[s].set_major_history()
 
-    # To get the Course data for Sp 2014
-
-    # for c1 in validation_courses:
-    #     # course ids
-    #     print validation_courses[c1][0]
-    # for c2 in validation_courses:
-    #     # course title
-    #     output = validation_courses[c2][1]
-    #     if len(validation_courses[c2][2]) > 0:
-    #         output += ": " + validation_courses[c2][2]
-    #     print output
-    # for c3 in validation_courses:
-    #     # prof
-    #     print validation_courses[c3][3]
-    # for c4 in validation_courses:
-    #     # number of students
-    #     print validation_courses[c4][4]
-
     return [students, courses, professors]
 
+def enter_prereg_data(courses, prereg_data):
+    """
+    Take in the list of courses and the prereg data and try to match entries in the prereg data 
+    to course numbers and/or titles and then add the expected enrollment from the prereg data
+    to the course offering associated with that course
+    """
+    for semester in prereg_data:
+        one_semesters_data = prereg_data[semester]
+        for course_title in one_semesters_data:
+            for course_no in courses:
+                if (course_no in course_title or courses[course_no].title in course_title) and semester in courses[course_no].course_offerings:
+                    courses[course_no].course_offerings[semester].prereg_predicted_enrollment = one_semesters_data[course_title]
+                    print courses[course_no].course_offerings[semester]
 
-[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
-for course_no in courses:
-    print courses[course_no]
+
+
+
+#[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+#prereg_data = get_prereg_data("../pre_reg_survey_data/*")
+#enter_prereg_data(courses, prereg_data)
 
 
 

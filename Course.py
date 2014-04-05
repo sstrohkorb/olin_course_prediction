@@ -15,10 +15,8 @@ class Course:
       display_str += self.section_title
     for semester in self.course_offerings:
       display_str += "\n\t" + semester + " : " + str(self.course_offerings[semester].enrollment) + ", " 
-      display_str += "["
       for professor in self.course_offerings[semester].professors:
-        display_str += professor.name + ", "
-      display_str += "]"
+        display_str += professor.name + "; "
     return display_str + "\n"
 
   def add_course_offering(self, semester):

@@ -63,14 +63,17 @@ def get_prereg_data(desired_files_path):
     [course_start_column, course_name_row, total_row] = sem_data[sem_data_len - 1]
     
     for i in range(sem_data_len):
-      trimmed_list = sem_data[i][course_start_column : sem_data_len]
+      trimmed_list = sem_data[i][course_start_column : len(sem_data[0])]
       if i == course_name_row:
         course_name_list = trimmed_list
       elif i == total_row:
         total_expected_enrollment_list = trimmed_list
 
     for j in range(len(course_name_list)):
-      course_enrollment_dict[course_name_list[j]] = total_expected_enrollment_list[j]
+      course_name = course_name_list[j]
+      space_index = course_name.find(" ")
+      course_name = course_name[0 : space_index] + course_name[(space_index + 1) : len(course_name)]
+      course_enrollment_dict[sem][course_name] = total_expected_enrollment_list[j]
 
   return course_enrollment_dict
 
