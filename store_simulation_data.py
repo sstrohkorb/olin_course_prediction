@@ -3,50 +3,39 @@ from parse_course_data import *
 import csv
 
 semesters_dict = {"1011FA": 0, "1011SP": 1, "1112FA": 2, "1112SP": 3, "1213FA": 4, "1213SP": 5, "1314FA": 6, "1314SP": 7}
-course_list = []
+course_list = ["SCI1210"]
 
 [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
 prereg_data = get_prereg_data("../pre_reg_survey_data/*")
 enter_prereg_data(courses, prereg_data)
 
-for course_num in course_list: 
+column_headings = ["Semester", "Predicted Enrollment", "Actual Enrollment", "Pre-Reg Enrollment"]
+
+for course_no in course_list: 
+  num_semesters = len(semesters_dict)
+  actual_enrollment = [0] * num_semesters
+  prereg_enrollment = [0] * num_semesters
+  predicted_enrollment = [0] * num_semesters
+  semester_names = [''] * num_semesters
+  for i in range(num_semesters):
+    for semester in semesters_dict:
+      if semesters_dict[semester] == i:
+        desired_semester = semester
+    semester_names[i] = desired_semester
 
   # Get all the data in lists right here
   # Berit:
+  # if you could store your stuff in predicted_enrollment, that'd be great!! 
 
   # Sarah:
+    if desired_semester in courses[course_no].course_offerings:
+        actual_enrollment[i] = courses[course_no].course_offerings[desired_semester].enrollment
+        prereg_enrollment[i] = courses[course_no].course_offerings[desired_semester].prereg_predicted_enrollment
 
-  with open('/simulation_data/' + course_num + '.csv', 'w', newline='') as fp:
-      a = csv.writer(fp, delimiter=',')
+
+  with open('simulation_data/' + course_no + '.csv', 'wb') as csv_file:
+      writer = csv.writer(csv_file, delimiter=',')
       data = [['Me', 'You'],
               ['293', '219'],
               ['54', '13']]
-      a.writerows(data)
-
-
-print "\nActual enrollment data:\n"
-for course_no in courses:
-    if course_no == "ENGR3290":
-        continue
-    if desired_semester in courses[course_no].course_offerings:
-        print courses[course_no].course_offerings[desired_semester].enrollment
-    else:
-        print 0
-
-print "\nPrereg data:\n"
-for course_no in courses:
-    if course_no == "ENGR3290":
-        continue
-    if desired_semester in courses[course_no].course_offerings:
-        print courses[course_no].course_offerings[desired_semester].prereg_predicted_enrollment
-    else:
-        print 0
-
-print "\nTotal Enrollment (ever)\n"
-for course_no in courses:
-    if course_no == "ENGR3290":
-        continue
-    tots_enrollment = 0
-    for sem_offered in courses[course_no].course_offerings:
-        tots_enrollment += courses[course_no].course_offerings[sem_offered].enrollment
-    print tots_enrollment
+      writer.writerows(data)
