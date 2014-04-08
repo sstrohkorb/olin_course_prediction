@@ -123,13 +123,17 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
       continue
 
     num_courses = len(course_list)
-    x_vector = [0]*(num_courses + len(major_dict))
+    x_vector = [0]*(num_courses + len(major_dict) + 1) # 1 for the gender
     y_value = 0
 
     drop_student = False
 
     # Set major for current semester
     x_vector[num_courses + major_dict[student.major_history[current_semester]]] = 1
+
+    # Add geneder of the student
+    if 'F' in student.gender: 
+      x_vector[num_courses + len(major_dict)] = 1
     
     for course_offering in student.list_of_course_offerings:
 

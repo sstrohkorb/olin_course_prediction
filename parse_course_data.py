@@ -442,14 +442,11 @@ def enter_prereg_data(courses, prereg_data):
             for course_no in courses:
                 if (course_no in course_title or courses[course_no].title in course_title) and semester in courses[course_no].course_offerings:
                     courses[course_no].course_offerings[semester].prereg_predicted_enrollment = one_semesters_data[course_title]
-                    print courses[course_no].course_offerings[semester]
 
 
 
 
-#[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
-#prereg_data = get_prereg_data("../pre_reg_survey_data/*")
-#enter_prereg_data(courses, prereg_data)
-
-
+# [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+# prereg_data = get_prereg_data("../pre_reg_survey_data/*")
+# enter_prereg_data(courses, prereg_data)
 
