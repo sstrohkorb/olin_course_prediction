@@ -54,9 +54,10 @@ def true_enrollment(students, courses, semester):
     enrollment = [0] * len(courses)
 
     for s in students:
-        for c in s.list_of_course_offerings:
-            course_no = c.course.course_number
-            enrollment[course_dict[course_no]] += 1
+        for semester_course_offerings in s.list_of_course_offerings:
+            for c in semester_course_offerings:
+                course_no = c.course.course_number
+                enrollment[course_dict[course_no]] += 1
 
     return enrollment
 
@@ -71,22 +72,24 @@ def get_testing_sets(students, semester):
     current_students = [{} for i in range(8)]
     non_current_students = {} #students who are not enrolled in given semester
     past_students = {} #students who are not current but were enrolled previously
-    for s_id in students:
-        student = students[s_id]
+    for s_id, student in students.items():
         # find all current students
-        for c in student.list_of_course_offerings:
-            if c.semester == semester:
-                current_students[c.student_semester_no][s_id] = student
-                break
+        for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
+            for c in semester_course_offerings:
+                if c.semester == semester:
+                    current_students[student_semester][s_id] = student
+                    break
 
         if student in current_students:
             continue
+            
         # find all past students if not current
-        for c in student.list_of_course_offerings:
-            if c.semester < semester:
-                # Kludge warning! This relies on a lexicographic string comparison
-                past_students[s_id] = student
-                break
+        for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
+            for c in semester_course_offerings:
+                if c.semester < semester:
+                    # Kludge warning! This relies on a lexicographic string comparison
+                    past_students[s_id] = student
+                    break
     return current_students, past_students
 
 def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=100, start_sem='0607FA', end_sem='1314FA'):

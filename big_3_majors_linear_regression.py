@@ -56,22 +56,24 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
   num_who_took_course_during_desired_semester = 0
   student_made_it_to_desired_semester = 0
 
-  for student_id in students:
-    # make sure that the student made it to the desired semester 
-    for course_offering in students[student_id].list_of_course_offerings:
-      if course_offering.student_semester_no == desired_semester:
-        student_made_it_to_desired_semester += 1
-        break
+  for student_id, student in students.items():
+    # make sure that the student made it to the desired semester
+    for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
+      for course_offering in semester_course_offerings:
+        if student_semester == desired_semester:
+          student_made_it_to_desired_semester += 1
+          break
     # then determine the rest
     if student_made_it_to_desired_semester: 
       total_eligible_to_take_course += 1
-      for course_offering in students[student_id].list_of_course_offerings:
-        course_no = course_offering.course.course_number
-        if course_no == desired_course:
-          if course_offering.student_semester_no <= current_semester:
-            num_who_took_course_previously += 1
-          if course_offering.student_semester_no == desired_semester:
-            num_who_took_course_during_desired_semester += 1
+      for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
+        for course_offering in semester_course_offerings:
+          course_no = course_offering.course.course_number
+          if course_no == desired_course:
+            if student_semester <= current_semester:
+              num_who_took_course_previously += 1
+            if student_semester == desired_semester:
+              num_who_took_course_during_desired_semester += 1
 
   total_not_taken_course_before = total_eligible_to_take_course - num_who_took_course_previously
 
@@ -152,43 +154,49 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
 
     # Set major for current semester
     x_vector[num_courses + major_dict[student.major_history[current_semester]]] = 1
-    
-    for course_offering in student.list_of_course_offerings:
+  
+    for student_sem, semester_course_offerings in enumerate(student.list_of_course_offerings):
+      # skip building data that will be discarded
+      if drop_student:
+        break
+      for course_offering in semester_course_offerings:
+        # skip building data that will be discarder
+        if drop_student:
+          break
 
-      # student did not reach desired_semester as of end_semester
-      # TODO: replace with a better check
-      if course_offering.semester == ending_semester:
-        if course_offering.student_semester_no < desired_semester:
-          drop_student = True
+        # student did not reach desired_semester as of end_semester
+        if course_offering.semester == ending_semester:
+          if student_sem < desired_semester:
+            drop_student = True
 
-      course_no = course_offering.course.course_number
-      x_vector[course_dict[course_no]] = 1
+        course_no = course_offering.course.course_number
+        x_vector[course_dict[course_no]] = 1
 
-      # don't include courses from "the future"
-      if course_offering.semester > ending_semester:
-        x_vector[course_dict[course_no]] = 0
+        # don't include courses from "the future"
+        if course_offering.semester > ending_semester:
+          x_vector[course_dict[course_no]] = 0
 
-      # don't include courses that have had less than 100 students enrolled in them (ever)
-      elif course_offering.course.total_number_of_students < 100:
-        x_vector[course_dict[course_no]] = 0
+        # don't include courses that have had less than 100 students enrolled in them (ever)
+        elif course_offering.course.total_number_of_students < 100:
+          x_vector[course_dict[course_no]] = 0
 
-      # designate the students that actually did take the desired course during the desired semester
-      elif course_no == desired_course and course_offering.student_semester_no == desired_semester:
-        x_vector[course_dict[course_no]] = 0
-        y_value = 1
+        # designate the students that actually did take the desired course during the desired semester
+        elif course_no == desired_course and student_sem == desired_semester:
+          x_vector[course_dict[course_no]] = 0
+          y_value = 1
 
-      # if the course is in a semester beyond what we're considering, set the y value to 0
-      # (not including the 'future' information in our calculations)
-      # TODO: change this when course_offering changes
-      elif course_offering.student_semester_no > current_semester:
-        x_vector[course_dict[course_no]] = 0
+        # if the course is in a semester beyond what we're considering, set the y value to 0
+        # (not including the 'future' information in our calculations)
+        # TODO: change this when course_offering changes
+        elif student_sem > current_semester:
+          x_vector[course_dict[course_no]] = 0
 
-      # if student has already taken class
-      elif course_no == desired_course and course_offering.student_semester_no <= current_semester:
-        drop_student = True 
+        # if student has already taken class
+        elif course_no == desired_course and student_sem <= current_semester:
+          drop_student = True 
 
     if drop_student:
-      continue
+        continue
 
     all_x_vectors.append(x_vector)
     all_y_values.append(y_value)
@@ -448,18 +456,26 @@ if __name__ == "__main__":
   students, courses, professors, semesters, all_courses_list = initialize_data()
   all_course_numbers = [x[0] for x in all_courses_list]
 
-  start_sems = ['0203FA','0203SP', '0304FA','0304SP', '0405FA','0405SP', '0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
-  end_sems = ['0708FA', '0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+  # start_sems = ['0203FA','0203SP', '0304FA','0304SP', '0405FA','0405SP', '0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
+  # end_sems = ['0708FA', '0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
   # start_sems = ['0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
   # end_sems = ['1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
 
-  for start, end in zip(reversed(start_sems), reversed(end_sems)):
-    filename = 'results/simulate_%s_%s.csv'%(start, end)
+  # for start, end in zip(reversed(start_sems), reversed(end_sems)):
+  #   filename = 'results/simulate_%s_%s.csv'%(start, end)
+  #   print 'simulating %s - %s'%(start, end)
+  #   try:
+  #     run_sim(filename, num_iter=50, sim_courses=all_course_numbers, start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
+  #   except:
+  #     print 'simulation failed: %s - %s'%(start, end)
+
+  start_sems = ['0405FA']
+  end_sems = ['0910FA']
+  for start, end in zip(start_sems, end_sems):
+    filename = 'test.csv'
     print 'simulating %s - %s'%(start, end)
-    try:
-      run_sim(filename, num_iter=50, sim_courses=all_course_numbers, start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
-    except:
-      print 'simulation failed: %s - %s'%(start, end)
+    run_sim(filename, num_iter=3, sim_courses=['ENGR3525'], start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
+
 
 
 
