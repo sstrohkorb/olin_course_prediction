@@ -3,3 +3,6 @@
 sarah_course_cleaning.txt
 sarah_printing_all_courses.py
 .~lock*
+*.xls
+*.csv
+*.xlsx
