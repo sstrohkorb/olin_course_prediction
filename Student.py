@@ -11,8 +11,8 @@ class Student:
     self.major = major
     self.concentration = concentration
     self.academic_status = academic_status
-    self.final_semester = None
-    self.first_semester = None
+    self.final_semester = None # last academic semester in student's career
+    self.first_semester = None # int representing the year semester since Olin's inception
     # self.major_set = set()
     self.major_history = {}
 
