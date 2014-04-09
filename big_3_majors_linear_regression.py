@@ -253,9 +253,7 @@ def compute_ROC_for_logistic(logistic, x_test, y_test):
   # prob started giving me a length 1 vector for some reason =/
   sorted_probabilities = sorted(zip(prob, y_test), key=lambda x:x[0][0])
 
-  y_values = []
-  for (prob, y_value) in sorted_probabilities:
-    y_values.append(y_value)
+  probs, y_values = zip(*sorted_probabilities)
   
   area = compute_ROC(y_values)
   
@@ -397,6 +395,35 @@ def run_sim(filename, num_iter=100, sim_courses=None, start_sem='0607FA', end_se
     print course
     tot_enrolled, avg_roc_arith, sem_enr, max_rocs = sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter)
     f.writerow([course, tot_enrolled, avg_roc_arith] + sem_enr + max_rocs)
+
+def get_sim_data(num_iter=100, sim_courses=None, start_sem='0607FA', end_sem='1314FA', students=None, courses=None, professors=None, semesters=None, all_courses_list=None):
+  """
+  predict course enrollment and return predictions and ROC values
+  parameters:
+    num_iter: (int) number of times logistic is made for a given case when determining
+      the best c value
+    sim_courses: (list of course numbers) courses to simulate. run spring 2014 courses if none provided
+  return value:
+    dictionary mapping course number to (tot_enrolled, avg_roc_arith, sem_enr, max_rocs)
+  """
+  print 'predicting %s - %s'%(start_sem, end_sem)
+  course_list = sim_courses or ['ENGR2320', 'MTH2199B', 'ENGR3499A', 'ENGR3599', 'AHSE4190', 'MTH2199A', 'MTH2199C', 
+    'ENGR3499', 'ENGR3299', 'ENGR3810', 'MTH2140', 'SCI2214', 'ENGR1330', 'ENGR2350', 'MTH3170', 'MTH2188A', 
+    'ENGR4190', 'AHSE3190', 'ENGR2599', 'AHSE3199', 'ENGR2410', 'MTH2199', 'ENGR2141', 'ENGR3370', 'SCI2320', 
+    'AHSE0112', 'ENGR2510', 'SCI1410', 'ENGR3525', 'SUST3301', 'ENGR4290', 'SCI3320', 'ENGR3620', 'ENGR3820', 
+    'ENGR2330', 'SCI2130B', 'ENGR3199', 'ENGR3399', 'SCI1310', 'MTH3120', 'AHSE4590', 'SCI1210', 'ENGR2199C', 
+    'ENGR3392', 'AHSE1500', 'ENGR1121', 'SCI1130', 'ENGR3415', 'AHSE2199', 'AHSE2199B', 'AHSE2199A', 'SCI1199B', 
+    'ENGR2210', 'ENGR2250', 'ENGR2420', 'ENGR3260', 'SCI2140']
+
+
+  if not students or not courses or not all_courses_list:
+    students, courses, professors, semesters, all_courses_list = initialize_data()
+
+  current_students, past_students = sim.get_testing_sets(students, end_sem)
+  c_vals = np.logspace(-1, 4, num=15)
+
+  data = {course: sim.simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=num_iter) for course in course_list}
+  return data
 
 def test_sweep_c(course_list, course_names, course_semester, current_semesters, c_values, starting_semester):
   """
