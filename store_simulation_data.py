@@ -6,7 +6,7 @@ from xlwt import Workbook
 
 w = Workbook()
 
-predicting_semesters = ['0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+predicting_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
 semester_names = ["1011FA", "1011SP", "1112FA", "1112SP", "1213FA", "1213SP", "1314FA", "1314SP"]
 semesters_dict = {semester_name: i for i, semester_name in enumerate(semester_names)}
 course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
@@ -22,7 +22,7 @@ column_headings = ["Semester", "Predicted Enrollment", "Actual Enrollment", "Pre
 
 # this makes predicitions using data from the beginning of Olin
 # list of dictionaries mapping course number to tuples (tot_enrolled, avg_roc_arith, sem_enr, max_rocs)
-sim_data = [get_sim_data(num_iter=50, sim_courses=course_list, start_sem=start_sem, end_sem=predicting_semesters[i+8], students=students, courses=courses, all_courses_list=all_courses_list) for i, start_sem in enumerate(predicting_semesters[:-8])]
+sim_data = [get_sim_data(num_iter=30, sim_courses=course_list, start_sem=start_sem, end_sem=predicting_semesters[i+8], students=students, courses=courses, all_courses_list=all_courses_list) for i, start_sem in enumerate(predicting_semesters[:-8])]
 
 for course_no in course_list: 
   course_name = courses[course_no].title
