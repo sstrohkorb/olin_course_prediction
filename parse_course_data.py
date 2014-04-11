@@ -446,7 +446,15 @@ def enter_prereg_data(courses, prereg_data):
 
 
 
-# [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
-# prereg_data = get_prereg_data("../pre_reg_survey_data/*")
-# enter_prereg_data(courses, prereg_data)
+[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+prereg_data = get_prereg_data("../pre_reg_survey_data/*")
+enter_prereg_data(courses, prereg_data)
+
+
+
+
+
+
+
+
 

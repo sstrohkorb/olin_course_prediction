@@ -5,7 +5,7 @@ class Course_Offering:
   def __init__(self, semester, Course, enrollment = 0):
     self.course = Course
     self.enrollment = enrollment
-    self.prereg_predicted_enrollment = 0
+    self.prereg_predicted_enrollment = [-1, -1, -1, -1]
     self.professors = Set()
     self.semester = semester
 
