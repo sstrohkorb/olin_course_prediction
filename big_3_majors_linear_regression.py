@@ -455,6 +455,21 @@ def test_sweep_c(course_list, course_names, course_semester, current_semesters, 
   plt.legend()
   plt.show()
 
+def test_sweep_c_for_course(start_sem='0607FA', end_sem='1314FA', students=None, courses=None, professors=None, semesters=None, all_courses_list=None):
+  print 'predicting %s - %s'%(start_sem, end_sem)
+  course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+               "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+               "ENGR3390", "ENGR3420", "AHSE2110"]
+
+  if not students or not courses or not all_courses_list:
+    students, courses, professors, semesters, all_courses_list = initialize_data()
+
+  current_students, past_students = sim.get_testing_sets(students, end_sem)
+  c_vals = np.logspace(-1, 4, num=15)
+
+  for course in course_list:
+    print sim.sweep_c_for_course(students, all_courses_list, professors, course, current_students, c_vals=c_vals, start_sem=start_sem, end_sem=end_sem)
+
 
 if __name__ == "__main__":
 
@@ -487,6 +502,8 @@ if __name__ == "__main__":
   students, courses, professors, semesters, all_courses_list = initialize_data()
   all_course_numbers = [x[0] for x in all_courses_list]
 
+  test_sweep_c_for_course()
+
   # start_sems = ['0203FA','0203SP', '0304FA','0304SP', '0405FA','0405SP', '0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
   # end_sems = ['0708FA', '0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
   # start_sems = ['0506FA','0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP']
@@ -500,12 +517,12 @@ if __name__ == "__main__":
   #   except:
   #     print 'simulation failed: %s - %s'%(start, end)
 
-  start_sems = ['0405FA']
-  end_sems = ['0910FA']
-  for start, end in zip(start_sems, end_sems):
-    filename = 'test.csv'
-    print 'simulating %s - %s'%(start, end)
-    run_sim(filename, num_iter=3, sim_courses=['ENGR3525'], start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
+  # start_sems = ['0405FA']
+  # end_sems = ['0910FA']
+  # for start, end in zip(start_sems, end_sems):
+  #   filename = 'test.csv'
+  #   print 'simulating %s - %s'%(start, end)
+  #   run_sim(filename, num_iter=3, sim_courses=['ENGR3525'], start_sem=start, end_sem=end, students=students, courses=courses, professors=professors, semesters=semesters, all_courses_list=all_courses_list )
 
 
 
