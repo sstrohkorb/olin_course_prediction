@@ -146,7 +146,7 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
       continue
 
     num_courses = len(course_list)
-    x_vector = [0]*(num_courses + len(major_dict) + 1) # 1 for the gender
+    x_vector = [0]*(num_courses + len(major_dict) + 1 + 2) # 1 for the gender, 2 for the pre-reg data
     y_value = 0
 
     # flag indicating that student should be discarded if set to True
@@ -175,6 +175,26 @@ def create_course_enrollment_data(students, courses, professors, starting_semest
 
         course_no = course_offering.course.course_number
         x_vector[course_dict[course_no]] = 1
+
+        # Add the prereg data into the x vector
+        if course_no == desired_course:
+          # Determine the 'year' the student is in to extract their prereg data
+          prereg_index = -1
+          if current_semester == 0 or current_semester == 1:
+            prereg_index = 0
+          elif current_semester == 2 or current_semester == 3:
+            prereg_index = 1
+          elif current_semester == 4 or current_semester == 5:
+            prereg_index = 2
+          else:
+            prereg_index = 3
+          # Enter the prereg data into the x vector
+          if course_offering.prereg_predicted_enrollment[prereg_index] != -1:
+            x_vector[num_courses + len(major_dict) + 1] = course_offering.prereg_predicted_enrollment[prereg_index]
+            x_vector[num_courses + len(major_dict) + 1 + 1] = 0
+          else: 
+            x_vector[num_courses + len(major_dict) + 1] = 0
+            x_vector[num_courses + len(major_dict) + 1 + 1] = 1
 
         # don't include courses from "the future"
         if course_offering.semester > ending_semester:
