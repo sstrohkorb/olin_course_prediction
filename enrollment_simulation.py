@@ -81,35 +81,6 @@ def true_enrollment(students, courses, semester):
     return enrollment
 
 
-def get_testing_sets(students, semester):
-    """
-    return list of students who are enrolled that semester
-    and students who were enrolled previous to that semester
-    """
-    # note that students who are away during semester will be considered past students
-    # even if they are enrolled in later semesters
-    current_students = [{} for i in range(8)]
-    non_current_students = {} #students who are not enrolled in given semester
-    past_students = {} #students who are not current but were enrolled previously
-    for s_id, student in students.items():
-        # find all current students
-        for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
-            for c in semester_course_offerings:
-                if c.semester == semester:
-                    current_students[student_semester][s_id] = student
-                    break
-
-        if student in current_students:
-            continue
-            
-        # find all past students if not current
-        for student_semester, semester_course_offerings in enumerate(student.list_of_course_offerings):
-            for c in semester_course_offerings:
-                if c.semester < semester:
-                    # Kludge warning! This relies on a lexicographic string comparison
-                    past_students[s_id] = student
-                    break
-    return current_students, past_students
 
 def simulate_course(students, all_courses_list, professors, course, current_students, c_vals, num_iter=100, start_sem='0607FA', end_sem='1314FA'):
     """
@@ -171,6 +142,14 @@ def sweep_c_for_course(students, all_courses_list, professors, course, current_s
 
         best_c = sorted(zip(c_values,error), key=lambda x: x[1])[0][0]
         best_c_vals.append((best_c, true_enrollment))
+        plt.plot(c_values, error, label=str(current_semester))
+
+    # title = [c[1] for c in all_courses_list if c[0] == course]
+
+    # plt.xscale('log')
+    # plt.legend()
+    # plt.title('%s: %s'%(course, title[0]))
+    # plt.show()
 
     return best_c_vals
 

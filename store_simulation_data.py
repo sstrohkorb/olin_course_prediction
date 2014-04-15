@@ -22,7 +22,7 @@ column_headings = ["Semester", "Predicted Enrollment", "Actual Enrollment", "Pre
 
 # this makes predicitions using data from the beginning of Olin
 # list of dictionaries mapping course number to tuples (tot_enrolled, avg_roc_arith, sem_enr, max_rocs)
-sim_data = [get_sim_data(num_iter=30, sim_courses=course_list, start_sem=start_sem, end_sem=predicting_semesters[i+8], students=students, courses=courses, all_courses_list=all_courses_list) for i, start_sem in enumerate(predicting_semesters[:-8])]
+sim_data = [get_sim_data(num_iter=1, sim_courses=course_list, start_sem=start_sem, end_sem=predicting_semesters[i+8], students=students, courses=courses, all_courses_list=all_courses_list) for i, start_sem in enumerate(predicting_semesters[:-8])]
 
 for course_no in course_list: 
   course_name = courses[course_no].title
@@ -41,6 +41,7 @@ for course_no in course_list:
   # Sarah:
     if desired_semester in courses[course_no].course_offerings:
         actual_enrollment[i] = int(courses[course_no].course_offerings[desired_semester].enrollment)
+        print courses[course_no].course_offerings[desired_semester].prereg_predicted_enrollment
         prereg_enrollment[i] = int(courses[course_no].course_offerings[desired_semester].prereg_predicted_enrollment)
 
   # Format data for input into the csv file
@@ -59,7 +60,7 @@ for course_no in course_list:
     for j,cell in enumerate(row):
         ws.write(i,j,cell)
 
-w.save("simulation_data.xls")
+w.save("test_data.xls")
 
 
 
