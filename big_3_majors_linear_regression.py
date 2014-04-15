@@ -65,21 +65,6 @@ def freuqency_based_prediction_strength(students, courses, professors, desired_c
 #       engineering concentration), and choose the majors we want to include based on #
 
 
-
-def test_logistic_binary(logistic, x_test, y_test):
-  """ Tests a given logisitc based on the testing data provided and checks its correctness by 
-      seeing what percentage correctness the logistic guesses right, whether a student will take
-      a given course or not
-  """
-  num_correct = 0
-  for i in range(len(x_test)):
-    predicted = logistic.predict(x_test[i])
-    if predicted == y_test[i]:
-      num_correct += 1
-  percent_correct = float(num_correct)/float(len(x_test))
-  # print "%f correct" %percent_correct
-  return percent_correct
-
 def area_under_curve(x_vals, y_vals):
   """ Given a set of x and y coordinates, calculates the area under the curve made by those
       points on the x-y axis
