@@ -1,5 +1,6 @@
 from make_train_test_data import *
 from parse_course_data import *
+from prediction import *
 from sklearn import linear_model
 
 def initialize_input_data(enrollment_history_filepath='../course_enrollments_2002-2014spring_anonymized.csv', prereg_data_filepath="../pre_reg_survey_data/*"):
@@ -44,5 +45,7 @@ if __name__ == '__main__':
     #make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
     [x_train, y_train, x_test, y_test] = make_semester_specific_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
 
-    make_logistic(x_train, y_train, 1e1)
+    logistic = make_logistic(x_train, y_train, 1e1)
+
+    print sum(predict_enrollment(logistic, x_test))
 

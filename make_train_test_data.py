@@ -147,7 +147,7 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
             prereg_index = 3
           # Enter the prereg data into the x vector
           if course_offering.prereg_predicted_enrollment[prereg_index] != -1:
-            x_vector[num_courses + len(major_dict) + 1] = course_offering.prereg_predicted_enrollment[prereg_index]
+            x_vector[num_courses + len(major_dict) + 1] = int(course_offering.prereg_predicted_enrollment[prereg_index])
             x_vector[num_courses + len(major_dict) + 1 + 1] = 0
           else: 
             x_vector[num_courses + len(major_dict) + 1] = 0

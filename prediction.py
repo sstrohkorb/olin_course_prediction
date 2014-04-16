@@ -12,10 +12,10 @@ def test_logistic_binary(logistic, x_test, y_test):
   # print "%f correct" %percent_correct
   return percent_correct
 
-  def expected_enrollment_for_course(logistic, x_test):
-    """
-    for a given course, find the probabilities of taking that course
-    """
-    prob = logistic.predict_proba(x_test)
+def predict_enrollment(logistic, x_test):
+  """
+  for a given course, find the probabilities of taking that course
+  """
+  prob = logistic.predict_proba(x_test)
 
-    return [(1-p[0]) for p in prob]
+  return [(1-p[0]) for p in prob]
