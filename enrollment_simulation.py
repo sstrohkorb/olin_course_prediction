@@ -49,16 +49,6 @@ def sweep_c_squared_error(x_train, y_train, x_test, true_enrollment, c_values=No
 
     return c_values, error
 
-def expected_enrollment_for_course(x_train, y_train, x_test, c_value):
-    """
-    for a given course, find the probabilities of taking that course
-    """
-    logistic = linear_model.LogisticRegression(C=c_value)
-    logistic.fit(x_train, y_train)
-
-    prob = logistic.predict_proba(x_test)
-
-    return [(1-p[0]) for p in prob]
 
 def true_enrollment(students, courses, semester):
     """
