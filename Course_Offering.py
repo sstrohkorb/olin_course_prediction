@@ -18,3 +18,11 @@ class Course_Offering:
     else: 
       if professor not in self.professors:
         self.professors.add(professor)
+
+  def total_prereg_enrollment(self):
+    total_prereg_enrollment = 0
+    for enrollment in self.prereg_predicted_enrollment:
+      int_enrollment = int(enrollment)
+      if int_enrollment != -1:
+        total_prereg_enrollment += int_enrollment
+    return total_prereg_enrollment

@@ -1,3 +1,4 @@
+from parse_course_data import *
 import numpy as np
 
 def get_current_and_past_students(students, semester):
@@ -34,27 +35,6 @@ def get_current_and_past_students(students, semester):
 
     return all_current_students, past_students
 
-def make_semesters_dict():
-  """
-  generate a dictionary mapping the string representation of a year semester (eg 0405FA)
-  to an int representing the number of semesters since Olin's inception
-  """
-  start = 2
-  end = 14
-  semesters = {}
-  for i in range((end - start)):
-    temp_start = str(start + i)
-    temp_end = str(start + i + 1)
-    if len(temp_start) == 1:
-      temp_start = '0' + temp_start
-    if len(temp_end) == 1:
-      temp_end = '0' + temp_end
-    sem_fa = temp_start + temp_end + 'FA'
-    sem_sp = temp_start + temp_end + 'SP' 
-    semesters[sem_fa] = i * 2
-    semesters[sem_sp] = i * 2 + 1
-  return semesters
-
 def make_student_feature_data(students, courses, desired_course, current_semester, desired_semester, starting_semester, ending_semester):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input.
@@ -87,7 +67,7 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
   major_dict = {'Undeclared': 0, 'Mechanical Engineering': 1, "Electr'l & Computer Engr": 2, 'Engineering': 3}
   
   # dict mapping year semsester to number of semesters since olin's inception
-  semesters = make_semesters_dict()
+  semesters = make_semesters_dict(2002, 2014)
 
   all_x_vectors = []
   all_y_values = []
@@ -103,7 +83,7 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
       continue
 
     num_courses = len(course_list)
-    x_vector = [0]*(num_courses + len(major_dict) + 1 + 2) # 1 for the gender, 2 for the pre-reg data
+    x_vector = [0]*(num_courses + len(major_dict) + 1 + 2 + 1) # 1 for the gender, 2 for the pre-reg data, 1 for the dummy
     y_value = 0
 
     # flag indicating that student should be discarded if set to True
