@@ -33,9 +33,9 @@ def make_random_train_test(students, all_courses_list, desired_course, current_s
     return [x_train, y_train, x_test, y_test]
 
 def make_semester_specific_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
-    current_students, past_students = get_current_and_past_students(students, ending_semester)
-    [x_train, y_train] = make_student_feature_data(past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
-    [x_test, y_test] = make_student_feature_data(current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
+    current_students, past_students = get_current_and_past_students(students, ending_semester, current_semester)
+    [x_train, y_train] = make_student_feature_data(False, past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
+    [x_test, y_test] = make_student_feature_data(True, current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
     if add_dummy_data: 
       x_train, y_train = add_dummy_student(x_train, y_train)
       x_test, y_test = add_dummy_student(x_test, y_test)
@@ -57,7 +57,7 @@ def predict_enrollment_for_one_course(students, all_courses_list, desired_course
   if len(x_test) == 0:
     return 0
   else: 
-    logistic = make_logistic(x_train, y_train, 1e1)
+    logistic = make_logistic(x_train, y_train, 1e3)
     return sum(predict_enrollment(logistic, x_test))
 
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
                    "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
                    "ENGR3390", "ENGR3420", "AHSE2110"]
-    # course_list = ["ENGR3390"]
+    # course_list = ["SCI1210"]
 
     predicted_data = {}
     for i in range(len(course_list)):

@@ -1,7 +1,7 @@
 from parse_course_data import *
 import numpy as np
 
-def get_current_and_past_students(students, semester):
+def get_current_and_past_students(students, semester, current_semester):
     """
     return list of students who are enrolled that semester
     and students who were enrolled previous to that semester
@@ -29,13 +29,10 @@ def get_current_and_past_students(students, semester):
                     # Kludge warning! This relies on a lexicographic string comparison
                     past_students[s_id] = student
                     break
-    all_current_students = {}
-    for semester_dict in current_students:
-      all_current_students.update(semester_dict)
 
-    return all_current_students, past_students
+    return current_students[current_semester], past_students
 
-def make_student_feature_data(students, courses, desired_course, current_semester, desired_semester, starting_semester, ending_semester):
+def make_student_feature_data(is_current_student, students, courses, desired_course, current_semester, desired_semester, starting_semester, ending_semester):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input.
       parameters:
@@ -76,7 +73,8 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
 
     if student.final_semester < desired_semester:
       # student did not make it to desired_semester- discard student
-      continue
+      if not is_current_student: 
+        continue
 
     if semesters[student.first_semester] < semesters[starting_semester]:
       # if the student started at Olin before the input starting_semester, discard student
@@ -95,7 +93,7 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
     # Add geneder of the student
     if 'F' in student.gender: 
       x_vector[num_courses + len(major_dict)] = 1
-  
+
     for student_sem, semester_course_offerings in enumerate(student.list_of_course_offerings):
       # skip building data that will be discarded
       if drop_student:
@@ -106,9 +104,10 @@ def make_student_feature_data(students, courses, desired_course, current_semeste
           break
 
         # student did not reach desired_semester as of end_semester
-        if course_offering.semester == ending_semester:
-          if student_sem < desired_semester:
-            drop_student = True
+        if not is_current_student:
+          if course_offering.semester == ending_semester:
+            if student_sem < desired_semester:
+              drop_student = True
 
         course_no = course_offering.course.course_number
         x_vector[course_dict[course_no]] = 1

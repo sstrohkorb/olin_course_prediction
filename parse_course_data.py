@@ -117,11 +117,9 @@ def get_course_data(filename):
             # Sometimes the freshman first semester is labeled as 'TF', change it to 'FF', which is more frequently used
             if student_semester_str == 'TF': student_semester_str = 'FF'
             
-            student_semester_no = 0     # 'FF'
+            student_semester_no = 0     # 'FF' or 'FR'
 
-            if student_semester_str == 'FR':
-                student_semester_no = 1
-            elif student_semester_str == 'SO':
+            if student_semester_str == 'SO':
                 student_semester_no = 2
             elif student_semester_str == 'JR':
                 student_semester_no = 4
