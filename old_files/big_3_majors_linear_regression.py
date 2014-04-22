@@ -120,13 +120,6 @@ def compute_ROC(y_values):
   return area
   
 
-def determine_highest_weighted_courses(logistic, all_courses_list, number_of_courses):
-  """ Finds the classes with highest absolute value coefficients and determines whether 
-      they're positive or negative
-  """
-  sorted_highly_weighted_courses = sorted(zip(logistic.coef_[0], all_courses_list), key=lambda x:abs(x[0]), reverse=True)
-  return sorted_highly_weighted_courses[:number_of_courses]
-
 def prediction_strength_for_a_course(x_vector, y_vector, all_courses_list, number_of_iterations, c_value):
   """ Determine prediction strength for a course based on the area under the ROC curve and also
       determine what the highested weighted courses are for a given course 

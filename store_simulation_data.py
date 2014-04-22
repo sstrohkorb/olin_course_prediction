@@ -1,6 +1,6 @@
 from xlwt import Workbook
 
-def store_simulation_data(course_list, courses, sim_data, destination_file_name="test_data.xls"):
+def store_simulation_data(course_list, courses, semester_names, sim_data, destination_file_name="test_data.xls"):
   """
   course_list -> the list of courses we're predicting (course numbers)
   """
@@ -8,7 +8,6 @@ def store_simulation_data(course_list, courses, sim_data, destination_file_name=
   w = Workbook()
 
   column_headings = ["Semester", "Predicted Enrollment", "Actual Enrollment", "Pre-Reg Enrollment"]
-  semester_names = ["1011FA", "1011SP", "1112FA", "1112SP", "1213FA", "1213SP", "1314FA", "1314SP"]
   semesters_dict = {semester_name: i for i, semester_name in enumerate(semester_names)}
   
   for course_no in course_list: 

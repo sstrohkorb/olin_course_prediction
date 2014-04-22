@@ -2,6 +2,7 @@ from make_train_test_data import *
 from parse_course_data import *
 from prediction import *
 from store_simulation_data import * 
+from analyze_predictions import *
 from sklearn import linear_model
 
 def initialize_input_data(enrollment_history_filepath='../course_enrollments_2002-2014spring_anonymized.csv', prereg_data_filepath="../pre_reg_survey_data/*"):
@@ -49,7 +50,7 @@ def make_logistic(x_train, y_train, c_value=1e5):
   logistic.fit(x_train, y_train)
   return logistic
 
-def predict_enrollment_for_one_course(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
   #make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
   [x_train, y_train, x_test, y_test] = make_semester_specific_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
   
@@ -58,15 +59,21 @@ def predict_enrollment_for_one_course(students, all_courses_list, desired_course
     return 0
   else: 
     logistic = make_logistic(x_train, y_train, 1e3)
+    # 1 for the gender, 2 for the pre-reg data, 1 for the dummy
+    all_features_list = all_courses_list + [("MR1", 'Undeclared'), ("MR2", 'Mechanical Engineering'), ("MR3", "Electr'l & Computer Engr"), ("MR4", 'Engineering'), ("G", "gender"), ("PR1", "Prereg enrollment"), ("PR2", "No Prereg Data"), ("D", "Dummy data")]
+    #print courses[desired_course].course_offerings[ending_semester].prereg_predicted_enrollment
+    #print print_highest_weighted_courses(logistic, all_features_list, len(all_features_list))
     return sum(predict_enrollment(logistic, x_test))
 
 
 if __name__ == '__main__':
     students, courses, all_courses_list = initialize_input_data()
 
-    add_dummy_data = True
+    add_dummy_data = True # the Sarah's computer flag
 
     predicting_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+    # predicting_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+    
     course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
                    "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
                    "ENGR3390", "ENGR3420", "AHSE2110"]
@@ -74,17 +81,18 @@ if __name__ == '__main__':
 
     predicted_data = {}
     for i in range(len(course_list)):
-      print course_list[i]
+      # print course_list[i]
       all_semesters_predicted_enrollments = []
       for j in range(len(predicting_semesters) - 8):
         predicted_enrollments = []
         for k in range(7):
-          predicted_enrollments.append(predict_enrollment_for_one_course(students, all_courses_list, course_list[i], k, k+1, predicting_semesters[j], predicting_semesters[j + 8], add_dummy_data))
+          print course_list[i], predicting_semesters[j+8], k
+          predicted_enrollments.append(predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, predicting_semesters[j], predicting_semesters[j + 8], add_dummy_data))
         total_course_enrollment = sum(predicted_enrollments)
         all_semesters_predicted_enrollments.append(total_course_enrollment)
       predicted_data[course_list[i]] = all_semesters_predicted_enrollments
 
-    store_simulation_data(course_list, courses, predicted_data)
+    store_simulation_data(course_list, courses, predicting_semesters[8:], predicted_data)
 
     
 
