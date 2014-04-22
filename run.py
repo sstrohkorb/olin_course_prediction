@@ -74,16 +74,16 @@ if __name__ == '__main__':
     predicting_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     # predicting_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     
-    course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
-                   "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
-                   "ENGR3390", "ENGR3420", "AHSE2110"]
-    # course_list = ["SCI1210"]
+    # course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+    #                "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+    #                "ENGR3390", "ENGR3420", "AHSE2110"]
+    course_list = ["SCI1210"]
 
     predicted_data = {}
     for i in range(len(course_list)):
       # print course_list[i]
       all_semesters_predicted_enrollments = []
-      for j in range(len(predicting_semesters) - 8):
+      for j in range(len(predicting_semesters) - 8 - 1):
         predicted_enrollments = []
         for k in range(7):
           print course_list[i], predicting_semesters[j+8], k
