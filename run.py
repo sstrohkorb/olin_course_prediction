@@ -71,28 +71,32 @@ if __name__ == '__main__':
 
     add_dummy_data = True # the Sarah's computer flag
 
-    predicting_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
-    # predicting_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+    ending_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+    predicting_semesters = ending_semesters[9:]
+    predicting_semesters.append('1415FA')
+
+    # ending_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     
-    # course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
-    #                "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
-    #                "ENGR3390", "ENGR3420", "AHSE2110"]
-    course_list = ["SCI1210"]
+    course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+                   "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+                   "ENGR3390", "ENGR3420", "AHSE2110"]
+    # course_list = ["SCI1210"]
 
     predicted_data = {}
     for i in range(len(course_list)):
-      # print course_list[i]
+      print course_list[i]
       all_semesters_predicted_enrollments = []
-      for j in range(len(predicting_semesters) - 8 - 1):
+      for j in range(len(ending_semesters) - 8):
         predicted_enrollments = []
         for k in range(7):
-          print course_list[i], predicting_semesters[j+8], k
-          predicted_enrollments.append(predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, predicting_semesters[j], predicting_semesters[j + 8], add_dummy_data))
+          # print course_list[i], ending_semesters[j+8], k
+          predicted_enrollments.append(predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data))
         total_course_enrollment = sum(predicted_enrollments)
         all_semesters_predicted_enrollments.append(total_course_enrollment)
       predicted_data[course_list[i]] = all_semesters_predicted_enrollments
 
-    store_simulation_data(course_list, courses, predicting_semesters[8:], predicted_data)
+
+    store_simulation_data(course_list, courses, predicting_semesters, predicted_data)
 
     
 
