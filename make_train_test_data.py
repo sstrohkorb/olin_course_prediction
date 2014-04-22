@@ -247,6 +247,8 @@ def make_prereg_feature_data(is_current_student, students, courses, desired_cour
             if student_sem < desired_semester:
               drop_student = True
 
+        course_no = course_offering.course.course_number
+
         # Add the prereg data into the x vector
         if course_no == desired_course:
           # Determine the 'year' the student is in to extract their prereg data
