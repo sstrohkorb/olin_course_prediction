@@ -23,6 +23,10 @@ def add_dummy_student(x_list, y_list):
       for i in range(2): x_list.append(dummy_x)
       y_list.append(1)
       y_list.append(0)
+    # else: 
+    #   for i in range(2): x_list.append([1])
+    #   y_list.append(1)
+    #   y_list.append(0)
     return x_list, y_list
 
 def make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
@@ -33,19 +37,10 @@ def make_random_train_test(students, all_courses_list, desired_course, current_s
       x_test, y_test = add_dummy_student(x_test, y_test)
     return [x_train, y_train, x_test, y_test]
 
-def make_semester_specific_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def make_semester_specific_train_test(situation, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
     current_students, past_students = get_current_and_past_students(students, ending_semester, current_semester)
-    [x_train, y_train] = make_student_feature_data(False, past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
-    [x_test, y_test] = make_student_feature_data(True, current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
-    if add_dummy_data: 
-      x_train, y_train = add_dummy_student(x_train, y_train)
-      x_test, y_test = add_dummy_student(x_test, y_test)
-    return [x_train, y_train, x_test, y_test]
-
-def make_semester_specific_prereg_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
-    current_students, past_students = get_current_and_past_students(students, ending_semester, current_semester)
-    [x_train, y_train] = make_prereg_feature_data(False, past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
-    [x_test, y_test] = make_prereg_feature_data(True, current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
+    [x_train, y_train] = make_student_feature_data(situation, False, past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+    [x_test, y_test] = make_student_feature_data(situation, True, current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
     if add_dummy_data: 
       x_train, y_train = add_dummy_student(x_train, y_train)
       x_test, y_test = add_dummy_student(x_test, y_test)
@@ -62,19 +57,21 @@ def make_logistic(x_train, y_train, c_value=1e5):
 
 def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
   #make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train, y_train, x_test, y_test] = make_semester_specific_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train_p, y_train_p, x_test_p, y_test_p] = make_semester_specific_prereg_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+  [x_train, y_train, x_test, y_test] = make_semester_specific_train_test(0, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+  [x_train_p, y_train_p, x_test_p, y_test_p] = make_semester_specific_train_test(2, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+  [x_train_ch, y_train_ch, x_test_ch, y_test_ch] = make_semester_specific_train_test(3, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+  [x_train_pch, y_train_pch, x_test_pch, y_test_pch] = make_semester_specific_train_test(4, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
   # If everyone has taken the class already 
   if len(x_test) == 0:
-    return [0, 0]
+    return [0, 0, 0, 0]
   else: 
     logistic = make_logistic(x_train, y_train, 1e3)
     logistic_p = make_logistic(x_train_p, y_train_p, 1e3)
+    logistic_ch = make_logistic(x_train_ch, y_train_ch, 1e3)
+    logistic_pch = make_logistic(x_train_pch, y_train_pch, 1e3)
     # 1 for the gender, 2 for the pre-reg data, 1 for the dummy
     all_features_list = all_courses_list + [("MR1", 'Undeclared'), ("MR2", 'Mechanical Engineering'), ("MR3", "Electr'l & Computer Engr"), ("MR4", 'Engineering'), ("G", "gender"), ("PR1", "Prereg enrollment"), ("PR2", "No Prereg Data"), ("D", "Dummy data")]
-    #print courses[desired_course].course_offerings[ending_semester].prereg_predicted_enrollment
-    #print print_highest_weighted_courses(logistic, all_features_list, len(all_features_list))
-    return [sum(predict_enrollment(logistic, x_test)), sum(predict_enrollment(logistic_p, x_test_p))]
+    return [sum(predict_enrollment(logistic, x_test)), sum(predict_enrollment(logistic_p, x_test_p)), sum(predict_enrollment(logistic_ch, x_test_ch)), sum(predict_enrollment(logistic_pch, x_test_pch))]
 
 
 if __name__ == '__main__':
@@ -95,29 +92,43 @@ if __name__ == '__main__':
 
     predicted_data = {}
     predicted_data_p = {}
+    predicted_data_ch = {}
+    predicted_data_pch = {}
     for i in range(len(course_list)):
       print course_list[i]
       all_semesters_predicted_enrollments = []
       all_semesters_predicted_enrollments_p = []
+      all_semesters_predicted_enrollments_ch = []
+      all_semesters_predicted_enrollments_pch = []
       for j in range(len(ending_semesters) - 8):
         predicted_enrollments = []
         predicted_enrollments_p = []
+        predicted_enrollments_ch = []
+        predicted_enrollments_pch = []
         for k in range(7):
           # print course_list[i], predicting_semesters[j+8], k
-          print course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data
-          [pred, pred_p] = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
+          # print course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data
+          [pred, pred_p, pred_ch, pred_pch] = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
           # print predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
           predicted_enrollments.append(pred)
           predicted_enrollments_p.append(pred_p)
+          predicted_enrollments_ch.append(pred_ch)
+          predicted_enrollments_pch.append(pred_pch)
 
         total_course_enrollment = sum(predicted_enrollments)
         total_course_enrollment_p = sum(predicted_enrollments_p)
+        total_course_enrollment_ch = sum(predicted_enrollments_ch)
+        total_course_enrollment_pch = sum(predicted_enrollments_pch)
         all_semesters_predicted_enrollments.append(total_course_enrollment)
         all_semesters_predicted_enrollments_p.append(total_course_enrollment_p)
+        all_semesters_predicted_enrollments_ch.append(total_course_enrollment_ch)
+        all_semesters_predicted_enrollments_pch.append(total_course_enrollment_pch)
       predicted_data[course_list[i]] = all_semesters_predicted_enrollments
       predicted_data_p[course_list[i]] = all_semesters_predicted_enrollments_p
+      predicted_data_ch[course_list[i]] = all_semesters_predicted_enrollments_ch
+      predicted_data_pch[course_list[i]] = all_semesters_predicted_enrollments_pch
 
-    store_simulation_data(course_list, courses, predicting_semesters, predicted_data, predicted_data_p)
+    store_simulation_data(course_list, courses, predicting_semesters, predicted_data, predicted_data_p, predicted_data_ch, predicted_data_pch)
 
 
     
