@@ -42,7 +42,6 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
           2 - Prereg data + Spring/Fall (Berit)
           3 - Course history + Spring/Fall
           4 - Prereg data + course history + Spring/Fall
-          5 - Spring/Fall semester specificty (Sarah)
         is_current_student: if the student is currently enrolled at Olin
         students: (dict) dictionary mapping student id to student object representing all students.
         courses: (list of tuples) list of courses being considered of form (course number, course title)
@@ -92,14 +91,14 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
     if situation == 0:
       x_vector = []
     elif situation == 1:
-      pass
+      x_vector = [0] * 1 # 1 for the fa/sp 
     elif situation == 2:
-      x_vector = [0] * 2 # 2 for the prereg data
+      x_vector = [0] * 3 # 2 for the prereg data, 1 for fa/sp
     elif situation == 3: 
-      x_vector = [0]*(num_courses + len(major_dict) + 1) # 1 for the gender
+      x_vector = [0]*(num_courses + len(major_dict) + 1 + 1) # 1 for the gender + 1 for fa/sp
     # situation = 4
     else:
-      x_vector = [0]*(num_courses + len(major_dict) + 1 + 2) # 1 for the gender, 2 for the pre-reg data
+      x_vector = [0]*(num_courses + len(major_dict) + 1 + 2 + 1) # 1 for the gender, 2 for the pre-reg data, 1 for fa/sp
     if add_dummy_data:
       x_vector.append(0)
 
@@ -107,6 +106,18 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
 
     # flag indicating that student should be discarded if set to True
     drop_student = False
+
+    # We want the semester specific flag
+    # 1 for spring semesters, 0 for fall semesters
+    if situation == 1:
+      x_vector[0] = desired_semester % 2
+    elif situation == 2:
+      x_vector[2] = desired_semester % 2
+    elif situation == 3:
+      x_vector[num_courses + len(major_dict) + 1] = desired_semester % 2
+    elif situation == 4:
+      x_vector[num_courses + len(major_dict) + 1 + 2] = desired_semester % 2
+
 
     if situation == 3 or situation == 4:
       # Set major for current semester

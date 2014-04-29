@@ -56,26 +56,30 @@ def make_logistic(x_train, y_train, c_value=1e5):
   return logistic
 
 def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
-  #make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train, y_train, x_test, y_test] = make_semester_specific_train_test(0, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train_p, y_train_p, x_test_p, y_test_p] = make_semester_specific_train_test(2, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train_ch, y_train_ch, x_test_ch, y_test_ch] = make_semester_specific_train_test(3, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  [x_train_pch, y_train_pch, x_test_pch, y_test_pch] = make_semester_specific_train_test(4, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-  # If everyone has taken the class already 
+  all_train_test_data = []
+  number_of_models = 5
+  for i in range(number_of_models):
+    train_test_data = make_semester_specific_train_test(i, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+    all_train_test_data.append(train_test_data)
+    # If everyone has taken the class already 
   if len(x_test) == 0:
-    return [0, 0, 0, 0]
+    return [0]*number_of_models
   else: 
-    logistic = make_logistic(x_train, y_train, 1e3)
-    logistic_p = make_logistic(x_train_p, y_train_p, 1e3)
-    logistic_ch = make_logistic(x_train_ch, y_train_ch, 1e3)
-    logistic_pch = make_logistic(x_train_pch, y_train_pch, 1e3)
-    # 1 for the gender, 2 for the pre-reg data, 1 for the dummy
-    all_features_list = all_courses_list + [("MR1", 'Undeclared'), ("MR2", 'Mechanical Engineering'), ("MR3", "Electr'l & Computer Engr"), ("MR4", 'Engineering'), ("G", "gender"), ("PR1", "Prereg enrollment"), ("PR2", "No Prereg Data"), ("D", "Dummy data")]
-    return [sum(predict_enrollment(logistic, x_test)), sum(predict_enrollment(logistic_p, x_test_p)), sum(predict_enrollment(logistic_ch, x_test_ch)), sum(predict_enrollment(logistic_pch, x_test_pch))]
-
+    all_predicted_enrollments = []
+    for train_test_data in all_train_test_data:
+      # train_test_data = [x_train, y_train, x_test, y_test]
+      x_train = train_test_data[0]
+      y_train = train_test_data[1]
+      x_test = train_test_data[2]
+      logistic = make_logistic(x_train, y_train, 1e3)
+      predicted_enrollment = sum(predict_enrollment(logistic, x_test))
+      all_predicted_enrollments.append(predicted_enrollment)
+    return all_predicted_enrollments
 
 if __name__ == '__main__':
     students, courses, all_courses_list = initialize_input_data()
+
+    number_of_models = 5
 
     add_dummy_data = True # the Sarah's computer flag
 
@@ -90,35 +94,21 @@ if __name__ == '__main__':
                    "ENGR3390", "ENGR3420", "AHSE2110"]
     # course_list = ["SCI1210"]
 
-    predicted_data = {}
-    predicted_data_p = {}
-    predicted_data_ch = {}
-    predicted_data_pch = {}
+    predicted_data = [{} for i in range(number_of_models)]
     for i in range(len(course_list)):
       print course_list[i]
       all_semesters_predicted_enrollments = []
       all_semesters_predicted_enrollments_p = []
       all_semesters_predicted_enrollments_ch = []
       all_semesters_predicted_enrollments_pch = []
-      for j in range(len(ending_semesters) - 8):
-        predicted_enrollments = []
-        predicted_enrollments_p = []
-        predicted_enrollments_ch = []
-        predicted_enrollments_pch = []
-        for k in range(7):
-          # print course_list[i], predicting_semesters[j+8], k
-          # print course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data
-          [pred, pred_p, pred_ch, pred_pch] = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
-          # print predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
-          predicted_enrollments.append(pred)
-          predicted_enrollments_p.append(pred_p)
-          predicted_enrollments_ch.append(pred_ch)
-          predicted_enrollments_pch.append(pred_pch)
 
-        total_course_enrollment = sum(predicted_enrollments)
-        total_course_enrollment_p = sum(predicted_enrollments_p)
-        total_course_enrollment_ch = sum(predicted_enrollments_ch)
-        total_course_enrollment_pch = sum(predicted_enrollments_pch)
+      for j in range(len(ending_semesters) - 8):
+        total_course_enrollments = [0]*number_of_models
+        for k in range(7):
+          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
+          for i in range(number_of_models):
+            total_course_enrollments[i] += all_predicted_enrollments_for_one_course[i]
+
         all_semesters_predicted_enrollments.append(total_course_enrollment)
         all_semesters_predicted_enrollments_p.append(total_course_enrollment_p)
         all_semesters_predicted_enrollments_ch.append(total_course_enrollment_ch)
