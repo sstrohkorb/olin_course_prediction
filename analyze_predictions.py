@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 def determine_highest_weighted_courses(logistic, all_features_list, number_of_courses):
   """ Finds the classes with highest absolute value coefficients and determines whether 
       they're positive or negative
@@ -65,4 +67,23 @@ def calculate_error_for_each_model(course_list, courses, semester_names, sim_dat
 
   return model_names, course_names, total_model_errors
 
+def make_histograms_for_models(model_names, course_names, error_list):
+  width = .8
+  bar_starts = range(len(course_names))
+  label_center = map(lambda x: x+width/2, bar_starts)
+  num_models = len(model_names)
+  plt.figure(1)
+  for i, model_name in enumerate(model_names):
+    plt.subplot(num_models, 1, i)
+    plt.bar(bar_starts, error_list[i])
+    plt.xticks(label_center, course_names)
+    plt.ylabel('error')
+    plt.title(model_name)
+  plt.show()
+
+def test_make_histo():
+  model_names = ['model a', 'model b']
+  course_names = ['course 1', 'course 2', 'course 3']
+  error_list = [ [2, 3, 4], [5, 2, 7]]
+  make_histograms_for_models(model_names, course_names, error_list)
 
