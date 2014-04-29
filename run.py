@@ -55,9 +55,8 @@ def make_logistic(x_train, y_train, c_value=1e5):
   logistic.fit(x_train, y_train)
   return logistic
 
-def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data, number_of_models):
   all_train_test_data = []
-  number_of_models = 5
   for i in range(number_of_models):
     train_test_data = make_semester_specific_train_test(i, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
     all_train_test_data.append(train_test_data)
@@ -81,7 +80,7 @@ if __name__ == '__main__':
 
     number_of_models = 5
 
-    add_dummy_data = False # the Sarah's computer flag
+    add_dummy_data = True # the Sarah's computer flag
 
     ending_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     predicting_semesters = ending_semesters[9:]
@@ -102,7 +101,7 @@ if __name__ == '__main__':
       for j in range(len(ending_semesters) - 8):
         total_course_enrollments = [0]*number_of_models
         for k in range(7):
-          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
+          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data, number_of_models)
           for x in range(number_of_models):
             total_course_enrollments[x] += all_predicted_enrollments_for_one_course[x]
         
