@@ -55,9 +55,8 @@ def make_logistic(x_train, y_train, c_value=1e5):
   logistic.fit(x_train, y_train)
   return logistic
 
-def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data, number_of_models):
   all_train_test_data = []
-  number_of_models = 5
   for i in range(number_of_models):
     train_test_data = make_semester_specific_train_test(i, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
     all_train_test_data.append(train_test_data)
@@ -81,7 +80,7 @@ if __name__ == '__main__':
 
     number_of_models = 5
 
-    add_dummy_data = False # the Sarah's computer flag
+    add_dummy_data = True # the Sarah's computer flag
 
     ending_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     predicting_semesters = ending_semesters[9:]
@@ -89,37 +88,28 @@ if __name__ == '__main__':
 
     # ending_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     
-    # course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
-    #                "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
-    #                "ENGR3390", "ENGR3420", "AHSE2110"]
-    course_list = ["SCI1210"]
+    course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+                   "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+                   "ENGR3390", "ENGR3420", "AHSE2110"]
+    # course_list = ["SCI1210"]
 
     predicted_data = [{} for x in range(number_of_models)]
     for i in range(len(course_list)):
       print course_list[i]
       all_semesters_predicted_enrollments = [[] for x in range(number_of_models)]
-      # all_semesters_predicted_enrollments_p = []
-      # all_semesters_predicted_enrollments_ch = []
-      # all_semesters_predicted_enrollments_pch = []
 
       for j in range(len(ending_semesters) - 8):
         total_course_enrollments = [0]*number_of_models
         for k in range(7):
-          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data)
+          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data, number_of_models)
           for x in range(number_of_models):
             total_course_enrollments[x] += all_predicted_enrollments_for_one_course[x]
-
         
         for x in range(number_of_models):
           all_semesters_predicted_enrollments[x].append(total_course_enrollments[x])
-        # all_semesters_predicted_enrollments_p.append(total_course_enrollment_p)
-        # all_semesters_predicted_enrollments_ch.append(total_course_enrollment_ch)
-        # all_semesters_predicted_enrollments_pch.append(total_course_enrollment_pch)
+
       for x in range(number_of_models):
-        predicted_data[x][course_list[i]] = all_semesters_predicted_enrollments[x]
-      # predicted_data_p[course_list[i]] = all_semesters_predicted_enrollments_p
-      # predicted_data_ch[course_list[i]] = all_semesters_predicted_enrollments_ch
-      # predicted_data_pch[course_list[i]] = all_semesters_predicted_enrollments_pch
+        predicted_data[x][course_list[i]] = all_semesters_predicted_enrollments[x]\
 
     store_simulation_data(course_list, courses, predicting_semesters, predicted_data)
 

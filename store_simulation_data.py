@@ -22,12 +22,7 @@ def store_simulation_data(course_list, courses, semester_names, sim_data, destin
     model_predicted_enrollment = [[] for i in range(number_of_models)]
     for i in range(number_of_models):
       model_predicted_enrollment[i] = sim_data[i][course_no]
-
-    # predicted_enrollment = sim_data[0][course_no]
-    # prereg_predicted_enrollment = sim_data[0][course_no]
-    # course_history_predicted_enrollment = sim_data[0][course_no]
-    # prereg_course_history_predicted_enrollment = sim_data[0][course_no]
-
+      
     for i, desired_semester in enumerate(semester_names):
     # Sarah:
       if desired_semester in courses[course_no].course_offerings:

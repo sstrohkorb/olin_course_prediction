@@ -145,19 +145,20 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
         if situation == 3 or situation == 4: 
           x_vector[course_dict[course_no]] = 1
 
+        # Determine the 'year' the student is in to extract their prereg data
+        prereg_index = -1
+        if current_semester == 0 or current_semester == 1:
+          prereg_index = 0
+        elif current_semester == 2 or current_semester == 3:
+          prereg_index = 1
+        elif current_semester == 4 or current_semester == 5:
+          prereg_index = 2
+        else:
+          prereg_index = 3
+
         if situation == 2 or situation == 4:
           # Add the prereg data into the x vector
           if course_no == desired_course:
-            # Determine the 'year' the student is in to extract their prereg data
-            prereg_index = -1
-            if current_semester == 0 or current_semester == 1:
-              prereg_index = 0
-            elif current_semester == 2 or current_semester == 3:
-              prereg_index = 1
-            elif current_semester == 4 or current_semester == 5:
-              prereg_index = 2
-            else:
-              prereg_index = 3
             # Enter the prereg data into the x vector
             prereg_feature_index = 0
             if situation == 4: 
