@@ -19,3 +19,50 @@ def print_highest_weighted_courses(logistic, all_features_list, number_of_course
       print course_info[1], i, correlation
     i += 1
   return temp_str
+
+def calculate_error_for_each_model(course_list, courses, semester_names, sim_data):
+  model_names = ["Baseline Predicted Enrollment","Spring/Fall Feature Enrollment", "Prereg Predicted Enrollment", "Course History Predicted Enrollment", "Prereg + Course History Predicted Enrollment", "Pre-Reg Enrollment"]
+
+  semesters_dict = {semester_name: i for i, semester_name in enumerate(semester_names)}
+  number_of_models = len(sim_data)
+
+  total_model_errors = [[] for x in range(number_of_models + 1)]
+
+  course_names = []
+
+  for course_no in course_list: 
+    course_name = courses[course_no].title
+    if courses[course_no].section_title != '':
+      course_name += ": " + courses[course_no].section_title
+    course_names.append(course_name)
+
+    num_semesters = len(semesters_dict)
+
+    actual_enrollment = [0] * num_semesters
+    prereg_enrollment = [0] * num_semesters
+
+    model_predicted_enrollment = [[] for i in range(number_of_models)]
+    for i in range(number_of_models):
+      model_predicted_enrollment[i] = sim_data[i][course_no]
+      
+    for i, desired_semester in enumerate(semester_names):
+      if desired_semester in courses[course_no].course_offerings:
+          actual_enrollment[i] = int(courses[course_no].course_offerings[desired_semester].enrollment)
+          prereg_enrollment[i] = int(courses[course_no].course_offerings[desired_semester].total_prereg_enrollment())
+
+    error_for_each_model = [0]*number_of_models
+    for j in range(number_of_models + 1): 
+      error_for_each_model = 0.0
+      for i in range(num_semesters):
+        smoother = 0.0
+        if actual_enrollment[i] == 0:
+          smoother = 1.0
+        if j == number_of_models:
+          error_for_each_model += abs(float(actual_enrollment[i]) - float(prereg_enrollment[i]) + smoother) / float(actual_enrollment[i] + smoother)
+        else:
+          error_for_each_model += abs(float(actual_enrollment[i]) - float(model_predicted_enrollment[j][i]) + smoother) / float(actual_enrollment[i] + smoother)
+      total_model_errors[j].append(error_for_each_model)
+
+  return model_names, course_names, total_model_errors
+
+
