@@ -88,10 +88,10 @@ if __name__ == '__main__':
 
     # ending_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     
-    # course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
-    #                "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
-    #                "ENGR3390", "ENGR3420", "AHSE2110"]
-    course_list = ["SCI1210", "ENGR2210", "SCI1410"]
+    course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+                   "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+                   "ENGR3390", "ENGR3420", "AHSE2110"]
+    # course_list = ["SCI1210", "ENGR2210", "SCI1410"]
     # course_list = ["SCI1210"]
 
     predicted_data = [{} for x in range(number_of_models)]
