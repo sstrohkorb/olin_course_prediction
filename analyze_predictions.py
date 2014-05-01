@@ -80,15 +80,16 @@ def make_histograms_for_models(model_names, course_names, error_list):
   bar_starts = range(len(course_names))
   label_center = map(lambda x: x+width/2, bar_starts)
   num_models = len(model_names)
-  plt.figure(1)
+  # plt.figure(1)
   for i, model_name in enumerate(model_names):
-    plt.subplot(num_models, 1, i+1)
+    plt.figure(i+1)
+    # plt.subplot(num_models, 1, i+1)
     plt.bar(bar_starts, error_list[i])
     
+    plt.xticks(label_center, course_names, rotation='vertical')
     plt.ylabel('error')
     plt.title(model_name)
 
-  plt.xticks(label_center, course_names, rotation='vertical')
   plt.show()
 
 def test_make_histo():
