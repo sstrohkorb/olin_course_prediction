@@ -74,16 +74,20 @@ def make_histograms_for_models(model_names, course_names, error_list):
   num_models = len(model_names)
   plt.figure(1)
   for i, model_name in enumerate(model_names):
-    plt.subplot(num_models, 1, i)
+    plt.subplot(num_models, 1, i+1)
     plt.bar(bar_starts, error_list[i])
-    plt.xticks(label_center, course_names)
+    
     plt.ylabel('error')
     plt.title(model_name)
+
+  plt.xticks(label_center, course_names, rotation='vertical')
   plt.show()
 
 def test_make_histo():
-  model_names = ['model a', 'model b']
-  course_names = ['course 1', 'course 2', 'course 3']
-  error_list = [ [2, 3, 4], [5, 2, 7]]
+  model_names = ['model a', 'model b', 'model c']
+  course_names = ['course 1', 'course 2', 'course 3', 'course 4']
+  error_list = [ [1,2,3,4], [5,4,3,2], [8,7,0,9]]
   make_histograms_for_models(model_names, course_names, error_list)
 
+if __name__ == '__main__':
+  test_make_histo()
