@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from numpy import *
 
 def determine_highest_weighted_courses(logistic, all_features_list, number_of_courses):
   """ Finds the classes with highest absolute value coefficients and determines whether 
@@ -64,10 +65,10 @@ def calculate_error_for_each_model(course_list, courses, semester_names, sim_dat
           if prereg_enrollment[i] == 0:
             error_for_each_model += 0
           else:
-            error_for_each_model += abs(float(actual_enrollment[i]) - float(prereg_enrollment[i]) + smoother) / float(actual_enrollment[i] + smoother)
+            error_for_each_model += abs(float(actual_enrollment[i]) - float(prereg_enrollment[i]))
         else:
           if prereg_enrollment[i] != 0 or not semesters_with_prereg_data_only:
-            error_for_each_model += abs(float(actual_enrollment[i]) - float(model_predicted_enrollment[j][i]) + smoother) / float(actual_enrollment[i] + smoother)
+            error_for_each_model += abs(float(actual_enrollment[i]) - float(model_predicted_enrollment[j][i]))
           else:
             error_for_each_model += 0
 
@@ -86,9 +87,13 @@ def make_histograms_for_models(model_names, course_names, error_list):
     plt.figure(i+1)
     # plt.subplot(num_models, 1, i+1)
     plt.bar(bar_starts, error_list[i])
+
+    print model_name
+    print median(error_list[i])
     
     plt.xticks(label_center, course_names, rotation='vertical')
     plt.ylabel('error')
+    plt.ylim((0, 60))
     plt.title(model_name)
 
   plt.show()
