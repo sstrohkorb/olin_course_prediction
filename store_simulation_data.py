@@ -1,5 +1,32 @@
 from xlwt import Workbook
 
+
+def make_excel_for_models(model_names, course_names, error_list, filename='model_comparison.xls'):
+  """
+  Write model error data to excel spreadsheet
+  """
+  w = Workbook()
+  column_headings = ['Course Name'] + model_names
+
+  data = [column_headings]
+  data.extend(zip(*[course_names] + error_list))
+
+  ws = w.add_sheet('model comparison')
+
+  for i,row in enumerate(data):
+      for j,cell in enumerate(row):
+          ws.write(i,j,cell)
+
+  w.save(filename)
+
+def test_make_excel_for_models(filename='excel_test.xls'):
+  model_names = ['model a', 'model b', 'model c']
+  course_names = ['course 1', 'course 2', 'course 3', 'course 4']
+  error_list = [ [1,2,3,4], [5,4,3,2], [8,7,0,9]]
+
+  make_excel_for_models(model_names, course_names, error_list, filename)
+
+
 def store_simulation_data(course_list, courses, semester_names, sim_data, destination_file_name="test_data.xls"):
   """
   course_list -> the list of courses we're predicting (course numbers)
@@ -46,6 +73,10 @@ def store_simulation_data(course_list, courses, semester_names, sim_data, destin
           ws.write(i,j,cell)
 
   w.save(destination_file_name)
+
+
+if __name__ == '__main__':
+  test_make_excel_for_models()
 
 
 

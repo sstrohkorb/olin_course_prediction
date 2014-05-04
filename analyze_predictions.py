@@ -80,6 +80,7 @@ def make_histograms_for_models(model_names, course_names, error_list):
   bar_starts = range(len(course_names))
   label_center = map(lambda x: x+width/2, bar_starts)
   num_models = len(model_names)
+  max_error = max([max(er_lst) for er_lst in error_list])
   # plt.figure(1)
   for i, model_name in enumerate(model_names):
     plt.figure(i+1)
@@ -91,6 +92,7 @@ def make_histograms_for_models(model_names, course_names, error_list):
     plt.title(model_name)
 
   plt.show()
+
 
 def test_make_histo():
   model_names = ['model a', 'model b', 'model c']
