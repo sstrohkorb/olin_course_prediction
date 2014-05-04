@@ -113,7 +113,8 @@ if __name__ == '__main__':
         predicted_data[x][course_list[i]] = all_semesters_predicted_enrollments[x]\
 
     model_names, course_names, total_model_errors = calculate_error_for_each_model(course_list, courses, predicting_semesters, predicted_data, True)
-    make_histograms_for_models(model_names, course_names, total_model_errors)
+    # make_histograms_for_models(model_names, course_names, total_model_errors)
+    make_excel_for_models(model_names, course_names, total_model_errors)
     store_simulation_data(course_list, courses, predicting_semesters, predicted_data)
 
 
