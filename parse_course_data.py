@@ -400,6 +400,9 @@ def get_course_data(filename):
             # add the course offering to the student's list of courses they've taken
             students[stud_id].add_course_offering(course_offering, student_semester_no)
 
+            # add the semester to the student's list of semesters present at Olin
+            students[stud_id].add_semester_present(course_semester)
+
             # build up the list of all semesters that the student took courses in 
             if stud_id in semester_list_per_student:
                 if course_semester not in semester_list_per_student[stud_id]:
@@ -438,18 +441,20 @@ def enter_prereg_data(courses, prereg_data):
         one_semesters_data = prereg_data[semester]
         for course_title in one_semesters_data:
             for course_no in courses:
-                if (course_no in course_title or courses[course_no].title in course_title) and semester in courses[course_no].course_offerings:
+                if (course_no in course_title or courses[course_no].title in course_title):
+                    if semester not in courses[course_no].course_offerings:
+                        course_offering = courses[course_no].add_course_offering(semester)
                     courses[course_no].course_offerings[semester].prereg_predicted_enrollment = one_semesters_data[course_title]
 
 
 
 
-[students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
-prereg_data = get_prereg_data("../pre_reg_survey_data/*")
-enter_prereg_data(courses, prereg_data)
-
-
-
+if __name__ == "__main__":
+    [students, courses, professors] = get_course_data('../course_enrollments_2002-2014spring_anonymized.csv')
+    prereg_data = get_prereg_data("../pre_reg_survey_data/*")
+    enter_prereg_data(courses, prereg_data)
+    for course_no in courses:
+        print courses[course_no].course_offerings
 
 
 

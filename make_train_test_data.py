@@ -32,7 +32,7 @@ def get_current_and_past_students(students, semester, current_semester):
 
     return current_students[current_semester], past_students
 
-def make_student_feature_data(situation, is_current_student, students, courses, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def make_student_feature_data(situation, is_current_student, students, all_courses_dict, courses, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data):
   """ Setup the x and y vectors that contain all of the data that the model will take in based
       on the enrollment data that is input.
       parameters:
@@ -44,6 +44,7 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
           4 - Prereg data + course history + Spring/Fall
         is_current_student: if the student is currently enrolled at Olin
         students: (dict) dictionary mapping student id to student object representing all students.
+        all_courses_dict: (dict) dictionary mapping course_no to the course object
         courses: (list of tuples) list of courses being considered of form (course number, course title)
         professors: (not currently in use) (dict) dictionary mapping professor name to Professor object
         starting_semester: (string) semester at which the data is to begin (eg '0708FA')
@@ -52,6 +53,7 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
         current_semester: (int) integer representing the current semester of the student
         desired_semester: (int) integer representing the predicted semester of the student
         ending_semester: (string) semester at which the data is to end (eg '0708FA')
+        predicting_for_semester: (string) semester that we're predicting for (eg '0708SP')
       return values:
         all_x_vectors represents the inputs to the linear regression model
         all_y_values represents the outputs to the linear regression model
@@ -126,6 +128,37 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
       if 'F' in student.gender: 
         x_vector[num_courses + len(major_dict)] = 1
 
+
+    # Determine the 'year' the student is in to extract their prereg data
+    prereg_index = -1
+    if desired_semester == 0 or desired_semester == 1:
+      prereg_index = 0
+    elif desired_semester == 2 or desired_semester == 3:
+      prereg_index = 1
+    elif desired_semester == 4 or desired_semester == 5:
+      prereg_index = 2
+    else:
+      prereg_index = 3
+
+    # Get the semester we're predicting for ('1314SP')
+    # Course has list of course offerings, so we find it that way. 
+    desired_course_object = all_courses_dict[desired_course]
+    desired_course_offering = desired_course_object.course_offerings[predicting_for_semester]
+
+    if situation == 2 or situation == 4:
+      # Add the prereg data into the x vector
+      prereg_feature_index = 0
+      if situation == 4: 
+        prereg_feature_index = num_courses + len(major_dict) + 1
+      if desired_course_offering.prereg_predicted_enrollment[prereg_index] != -1:
+        x_vector[prereg_feature_index] = int(desired_course_offering.prereg_predicted_enrollment[prereg_index])
+        x_vector[prereg_feature_index + 1] = 0
+      else: 
+        # Drop the student if prereg data doesn't exist for the semester we're interested in
+        drop_student = True
+        x_vector[prereg_feature_index] = 0
+        x_vector[prereg_feature_index + 1] = 1
+
     for student_sem, semester_course_offerings in enumerate(student.list_of_course_offerings):
       # skip building data that will be discarded
       if drop_student:
@@ -144,32 +177,6 @@ def make_student_feature_data(situation, is_current_student, students, courses, 
         course_no = course_offering.course.course_number
         if situation == 3 or situation == 4: 
           x_vector[course_dict[course_no]] = 1
-
-        # Determine the 'year' the student is in to extract their prereg data
-        prereg_index = -1
-        if current_semester == 0 or current_semester == 1:
-          prereg_index = 0
-        elif current_semester == 2 or current_semester == 3:
-          prereg_index = 1
-        elif current_semester == 4 or current_semester == 5:
-          prereg_index = 2
-        else:
-          prereg_index = 3
-
-        if situation == 2 or situation == 4:
-          # Add the prereg data into the x vector
-          if course_no == desired_course:
-            # Enter the prereg data into the x vector
-            prereg_feature_index = 0
-            if situation == 4: 
-              prereg_feature_index = num_courses + len(major_dict) + 1
-            if course_offering.prereg_predicted_enrollment[prereg_index] != -1:
-              x_vector[prereg_feature_index] = int(course_offering.prereg_predicted_enrollment[prereg_index])
-              x_vector[prereg_feature_index + 1] = 0
-            else: 
-              # drop_student = True
-              x_vector[prereg_feature_index] = 0
-              x_vector[prereg_feature_index + 1] = 1
 
 
         if situation == 3 or situation == 4: 

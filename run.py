@@ -29,18 +29,18 @@ def add_dummy_student(x_list, y_list):
     #   y_list.append(0)
     return x_list, y_list
 
-def make_random_train_test(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
-    [x_matrix, y_values] = make_student_feature_data(students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester)
+def make_random_train_test(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data):
+    [x_matrix, y_values] = make_student_feature_data(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
     [x_train, y_train, x_test, y_test] = make_random_training_data(x_matrix, y_values, len(y_values)/2)
     if add_dummy_data: 
       x_train, y_train = add_dummy_student(x_train, y_train)
       x_test, y_test = add_dummy_student(x_test, y_test)
     return [x_train, y_train, x_test, y_test]
 
-def make_semester_specific_train_test(situation, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data):
+def make_semester_specific_train_test(situation, students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data):
     current_students, past_students = get_current_and_past_students(students, ending_semester, current_semester)
-    [x_train, y_train] = make_student_feature_data(situation, False, past_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
-    [x_test, y_test] = make_student_feature_data(situation, True, current_students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+    [x_train, y_train] = make_student_feature_data(situation, False, past_students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
+    [x_test, y_test] = make_student_feature_data(situation, True, current_students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
     if add_dummy_data: 
       x_train, y_train = add_dummy_student(x_train, y_train)
       x_test, y_test = add_dummy_student(x_test, y_test)
@@ -55,10 +55,10 @@ def make_logistic(x_train, y_train, c_value=1e5):
   logistic.fit(x_train, y_train)
   return logistic
 
-def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data, number_of_models):
+def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data, number_of_models):
   all_train_test_data = []
   for i in range(number_of_models):
-    train_test_data = make_semester_specific_train_test(i, students, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, add_dummy_data)
+    train_test_data = make_semester_specific_train_test(i, students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
     all_train_test_data.append(train_test_data)
     # If everyone has taken the class already 
   if len(train_test_data[2]) == 0:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
       for j in range(len(ending_semesters) - 8):
         total_course_enrollments = [0]*number_of_models
         for k in range(7):
-          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], add_dummy_data, number_of_models)
+          all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], predicting_semesters[j], add_dummy_data, number_of_models)
           for x in range(number_of_models):
             total_course_enrollments[x] += all_predicted_enrollments_for_one_course[x]
         
