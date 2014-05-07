@@ -51,6 +51,7 @@ def make_logistic(x_train, y_train, c_value=1e5):
   """ Takes as input x vectors and their corresponding y values as well as the test size, makes 
       all of the training and testing data and makes a linear regression logistic
   """
+  c_value = 1e-1
   logistic = linear_model.LogisticRegression(C=c_value)
   logistic.fit(x_train, y_train)
   return logistic
@@ -65,12 +66,50 @@ def predict_enrollment_for_one_course(students, courses, all_courses_list, desir
     return [0]*number_of_models
   else: 
     all_predicted_enrollments = []
-    for train_test_data in all_train_test_data:
+    for j, train_test_data in enumerate(all_train_test_data):
       # train_test_data = [x_train, y_train, x_test, y_test]
       x_train = train_test_data[0]
       y_train = train_test_data[1]
       x_test = train_test_data[2]
-      logistic = make_logistic(x_train, y_train, 1e3)
+      logistic = make_logistic(x_train, y_train, 1e2)
+
+      all_features_list = []
+
+      # 0 - No prereg data (just average course enrollment)
+      # all_features_list is all set
+
+      # 1 - Spring/Fall semester specificty
+      if j == 1:
+        all_features_list.append("Gender")
+      # 2 - Prereg data + Spring/Fall (Berit)
+      elif j == 2:
+        all_features_list.append("Prereg data")
+        all_features_list.append("Prereg data presence (boolean)")
+        all_features_list.append("Fall/Spring (boolean)")
+      # 3 - Course history + Spring/Fall
+      elif j == 3:
+        all_features_list = [x[1] for x in all_courses_list]
+        all_features_list.append("Major: Undeclared")
+        all_features_list.append("Major: MechE")
+        all_features_list.append("Major: ECE")
+        all_features_list.append("Major: General E")
+        all_features_list.append("Gender")
+        all_features_list.append("Fall/Spring (boolean)")
+      # 4 - Prereg data + course history + Spring/Fall
+      elif j == 4:
+        all_features_list = [x[1] for x in all_courses_list]
+        all_features_list.append("Major: Undeclared")
+        all_features_list.append("Major: MechE")
+        all_features_list.append("Major: ECE")
+        all_features_list.append("Major: General E")
+        all_features_list.append("Gender")
+        all_features_list.append("Prereg data")
+        all_features_list.append("Prereg data presence (boolean)")
+        all_features_list.append("Fall/Spring (boolean)")
+
+      # Examine weights
+      # print print_highest_weighted_courses(logistic, all_features_list, 10)
+
       predicted_enrollment = sum(predict_enrollment(logistic, x_test))
       all_predicted_enrollments.append(predicted_enrollment)
     return all_predicted_enrollments
@@ -83,16 +122,16 @@ if __name__ == '__main__':
     add_dummy_data = True # the Sarah's computer flag
 
     ending_semesters = ['0506SP', '0607FA','0607SP', '0708FA','0708SP', '0809FA', '0809SP', '0910FA', '0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
+    # ending_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     predicting_semesters = ending_semesters[9:]
     predicting_semesters.append('1415FA')
 
-    # ending_semesters = ['0910SP', '1011FA', '1011SP', '1112FA', '1112SP', '1213FA', '1213SP', '1314FA', '1314SP']
     
     course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
                    "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
                    "ENGR3390", "ENGR3420", "AHSE2110"]
     # course_list = ["SCI1210", "ENGR2210", "SCI1410"]
-    # course_list = ["SCI1210"]
+    # course_list = ["ENGR2210"]
 
     predicted_data = [{} for x in range(number_of_models)]
     for i in range(len(course_list)):
@@ -102,6 +141,8 @@ if __name__ == '__main__':
       for j in range(len(ending_semesters) - 8):
         total_course_enrollments = [0]*number_of_models
         for k in range(7):
+          # print 
+          # print course_list[i], predicting_semesters[j], k
           all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], predicting_semesters[j], add_dummy_data, number_of_models)
           for x in range(number_of_models):
             total_course_enrollments[x] += all_predicted_enrollments_for_one_course[x]

@@ -38,7 +38,7 @@ def make_student_feature_data(situation, is_current_student, students, all_cours
       parameters:
         situation: defines the kind of data we want in our feature set:
           0 - No prereg data (just average course enrollment)
-          1 - Spring/Fall semester specificty
+          1 - Gender only 
           2 - Prereg data + Spring/Fall (Berit)
           3 - Course history + Spring/Fall
           4 - Prereg data + course history + Spring/Fall
@@ -111,15 +111,18 @@ def make_student_feature_data(situation, is_current_student, students, all_cours
 
     # We want the semester specific flag
     # 1 for spring semesters, 0 for fall semesters
-    if situation == 1:
-      x_vector[0] = desired_semester % 2
-    elif situation == 2:
+    # if situation == 1:
+    #   x_vector[0] = desired_semester % 2
+    if situation == 2:
       x_vector[2] = desired_semester % 2
     elif situation == 3:
       x_vector[num_courses + len(major_dict) + 1] = desired_semester % 2
     elif situation == 4:
       x_vector[num_courses + len(major_dict) + 1 + 2] = desired_semester % 2
 
+    if situation == 1:
+      if 'F' in student.gender:
+        x_vector[0] = 1
 
     if situation == 3 or situation == 4:
       # Set major for current semester
@@ -127,6 +130,7 @@ def make_student_feature_data(situation, is_current_student, students, all_cours
       # Add geneder of the student
       if 'F' in student.gender: 
         x_vector[num_courses + len(major_dict)] = 1
+
 
 
     # Determine the 'year' the student is in to extract their prereg data
@@ -140,24 +144,38 @@ def make_student_feature_data(situation, is_current_student, students, all_cours
     else:
       prereg_index = 3
 
-    # Get the semester we're predicting for ('1314SP')
-    # Course has list of course offerings, so we find it that way. 
-    desired_course_object = all_courses_dict[desired_course]
-    desired_course_offering = desired_course_object.course_offerings[predicting_for_semester]
 
     if situation == 2 or situation == 4:
       # Add the prereg data into the x vector
+
+      # Get the semester we're predicting for ('1314SP')
+      # Course has list of course offerings, so we find it that way. 
+      desired_course_object = all_courses_dict[desired_course]
+      
       prereg_feature_index = 0
       if situation == 4: 
         prereg_feature_index = num_courses + len(major_dict) + 1
-      if desired_course_offering.prereg_predicted_enrollment[prereg_index] != -1:
-        x_vector[prereg_feature_index] = int(desired_course_offering.prereg_predicted_enrollment[prereg_index])
-        x_vector[prereg_feature_index + 1] = 0
-      else: 
-        # Drop the student if prereg data doesn't exist for the semester we're interested in
-        drop_student = True
-        x_vector[prereg_feature_index] = 0
-        x_vector[prereg_feature_index + 1] = 1
+
+      if predicting_for_semester in desired_course_object.course_offerings:
+        desired_course_offering = desired_course_object.course_offerings[predicting_for_semester]
+
+        if desired_course_offering.prereg_predicted_enrollment[prereg_index] != -1:
+          raw_enrollment = float(desired_course_offering.prereg_predicted_enrollment[prereg_index])
+          class_size = 86 # assuming a class size of 86 people
+          if int(raw_enrollment) == 0:
+            raw_enrollment = 0.01
+          adjusted_enrollment = log((raw_enrollment/class_size)/(1-(raw_enrollment/class_size)))
+          x_vector[prereg_feature_index] = adjusted_enrollment
+          x_vector[prereg_feature_index + 1] = 0
+        else: 
+          # Drop the student if prereg data doesn't exist for the semester we're interested in
+          drop_student = True
+          x_vector[prereg_feature_index] = 0
+          x_vector[prereg_feature_index + 1] = 1
+
+      else:
+          x_vector[prereg_feature_index] = 0
+          x_vector[prereg_feature_index + 1] = 0
 
     for student_sem, semester_course_offerings in enumerate(student.list_of_course_offerings):
       # skip building data that will be discarded

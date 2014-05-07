@@ -1,6 +1,6 @@
 import csv
 import glob
-
+from math import *
 
 def get_prereg_data(desired_files_path):
   """
@@ -104,7 +104,8 @@ def get_prereg_data(desired_files_path):
       prereg_enrollment_list = []
       for enrollment_list in all_years_enrollment_lists:
         if enrollment_list:
-          prereg_enrollment_list.append(enrollment_list[j])
+          raw_enrollment = float(enrollment_list[j])
+          prereg_enrollment_list.append(raw_enrollment)
         else:
           prereg_enrollment_list.append(-1)
       course_enrollment_dict[sem][course_name] = prereg_enrollment_list

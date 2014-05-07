@@ -34,7 +34,7 @@ def store_simulation_data(course_list, courses, semester_names, sim_data, destin
   
   w = Workbook()
 
-  column_headings = ["Semester", "Baseline Predicted Enrollment","Spring/Fall Feature Enrollment", "Prereg Predicted Enrollment", "Course History Predicted Enrollment", "Prereg + Course History Predicted Enrollment", "Actual Enrollment", "Pre-Reg Enrollment"]
+  column_headings = ["Semester", "Baseline Predicted Enrollment","Gender Feature Enrollment", "Prereg Predicted Enrollment", "Course History Predicted Enrollment", "Prereg + Course History Predicted Enrollment", "Actual Enrollment", "Pre-Reg Enrollment"]
   semesters_dict = {semester_name: i for i, semester_name in enumerate(semester_names)}
   number_of_models = len(sim_data)
 

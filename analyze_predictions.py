@@ -13,18 +13,19 @@ def print_highest_weighted_courses(logistic, all_features_list, number_of_course
   temp_str = ""
   i = 0
   for correlation, course_info in highly_weighted_courses:
+    temp_str += str(correlation)
     # if correlation < 0:
     #   temp_str += "-"
     # else: 
     #   temp_str += "+"
-    # temp_str += " " + course_info[1] + '\n'
-    if course_info[0] == "PR1":
-      print course_info[1], i, correlation
+    temp_str += "\t" + course_info + '\n'
+    # if course_info[0] == "PR1":
+    #   print course_info[1], i, correlation
     i += 1
   return temp_str
 
 def calculate_error_for_each_model(course_list, courses, semester_names, sim_data, semesters_with_prereg_data_only):
-  model_names = ["Baseline Predicted Enrollment","Spring/Fall Feature Enrollment", "Prereg Predicted Enrollment", "Course History Predicted Enrollment", "Prereg + Course History Predicted Enrollment", "Pre-Reg Enrollment"]
+  model_names = ["Baseline Predicted Enrollment","Gender Feature Enrollment", "Prereg Predicted Enrollment", "Course History Predicted Enrollment", "Prereg + Course History Predicted Enrollment", "Pre-Reg Enrollment"]
 
   semesters_dict = {semester_name: i for i, semester_name in enumerate(semester_names)}
   number_of_models = len(sim_data)
