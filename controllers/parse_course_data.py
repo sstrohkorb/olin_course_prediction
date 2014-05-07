@@ -1,10 +1,5 @@
 import csv
-from Student import *
-from Course import *
-from Course_Offering import *
-from Graduating_Class import *
-from Major import *
-from Professor import *
+from models import *
 from parse_prereg_data import *
 
 def make_semesters_dict(start_year, end_year):
