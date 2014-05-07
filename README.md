@@ -1,4 +1,12 @@
 Olin Course Prediction
 ======================
 
-Applying machine learning techniques to a dataset containing all of the Olin College courses that students have ever taken in order to predict which courses a student is likely to take in the future. 
+An attempt to predict the enrollment of Olin College courses based on preregistration survey data and Olin's course history. 
+
+# Usage
+
+  python olin_course_prediction.py
+
+# Predictive Model
+
+  We used scikit learn's Linear Regression model (http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html) to predict whether or not a student is likely to take a course in a specific semester, given their grade level. 

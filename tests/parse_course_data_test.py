@@ -52,6 +52,25 @@ def get_course_data_students_test(students):
 
   return test01_pass, test01_error
 
+def get_course_data_courses_test(courses):
+  """ Test 02 - contents of courses """
+  test02_pass = True
+  test02_error = ""
+
+  if len(courses) != 14:
+    test02_pass = False
+    test02_error += "More or less than one student reported (there should be 14). "
+
+  if courses:
+    if not courses["ENGR2420"]:
+      test02_pass = False
+      test02_error += "Circuits course (ENGR2420) not present in courses list. "
+    else:
+      circuits = courses["ENGR2420"]
+      
+
+  return test02_pass, test02_error
+
 def get_course_data_test():
   
   all_tests_pass = True
@@ -64,8 +83,24 @@ def get_course_data_test():
   if test01_pass == False:
     all_tests_pass = False
     print "Test 01 FAIL: " + test01_error
-  
 
+  # courses test
+  test02_pass, test02_error = get_course_data_courses_test(courses)
+  if test02_pass == False:
+    all_tests_pass = False
+    print "Test 02 FAIL: " + test02_error
+
+  # no professors test for now since we don't really use it
   
   if all_tests_pass == True:
     print "PASS: all tests for get_course_data()"
+
+
+
+
+
+
+
+
+
+
