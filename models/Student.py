@@ -6,10 +6,10 @@ class Student:
   def __init__(self, ID, gender, graduating_class, major, concentration, academic_status):
     self.academic_status = academic_status
     self.concentration = concentration
-    self.final_semester = None # last academic semester in student's career
-    self.first_semester = None # int representing the year semester since Olin's inception
+    self.final_semester = None # (int) 0-7, last academic semester in student's career
+    self.first_semester = None # string representing the year semester since Olin's inception, e.g. "1011FA"
     self.gender = gender
-    self.graduating_class = graduating_class
+    self.graduating_class = graduating_class  # "2013" or "0" if the student hasn't graduated
     self.ID = ID
     self.list_of_course_offerings = x = [[] for i in range(8)]
     self.major = major
