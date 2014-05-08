@@ -7,6 +7,12 @@ An attempt to predict the enrollment of Olin College courses based on preregistr
 
     python olin_course_prediction.py
 
+## Preconditions
+
+Installation of scikit learn and its dependencies: http://scikit-learn.org/stable/install.html
+
+Also, Make sure to specify the locations of the Olin Course History data and Pre-Registration survey data in the main function of olin_course_prediction.py. Those files should be in the 'csv' format. Additionally, all of the pre-registration survey csv-files should be speicific to one semester and contain the semester information in the filename (eg 'FA10').
+
 # Predictive Model
 
 We used scikit learn's Linear Regression model: 

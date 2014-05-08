@@ -111,7 +111,10 @@ def predict_enrollment_for_one_course(students, courses, all_courses_list, desir
     return all_predicted_enrollments
 
 if __name__ == '__main__':
-    students, courses, all_courses_list = initialize_input_data()
+
+    enrollment_history_filepath = '../course_enrollments_2002-2014spring_anonymized.csv'
+    prereg_data_filepath = "../pre_reg_survey_data/*"
+    students, courses, all_courses_list = initialize_input_data(enrollment_history_filepath, prereg_data_filepath)
 
     number_of_models = 5
 
