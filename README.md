@@ -46,3 +46,21 @@ http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRe
 Using the linear regression model, we can predict whether or not a student is likely to take a course in a specific semester, given their grade level. 
 
 So, to predict the enrollment of Software Design in the 1415FA semester, we make 4 separate linear regression models, one for each grade of students. These models consider the course histories of all students, noting those who took Software Design in the fall semester of the specified grade as well as the preregistration data for how many students within that grade said that they would take Software Design. The model then predicts for each student at Olin that semester the probability that the student would take Software Design. These probabilities are summed to determine the predicted total enrollment of the course. 
+
+We have found that a C value (input to the Logisitc Regression model) of 0.1 achieves reasonable results, although more fine-tuning could be done to find the optimal C value. 
+
+# Data Structures (Models)
+
+There are several objects used to store the data from Olin's Course History in an effective way:
+
+  - Student: stores information like gender, starting/ending semesters, list of course offerings taken, and major
+
+  - Course: represents one course, like Software Design
+
+  - Course Offering: represents an offering of a single course, like the Fall 2014 offering of Software Design
+
+  - Major: and concentration
+
+  - Professor
+
+  - Graduating Class: this was initially designed to include information about the requirements for specific classes, but we didn't end up using it much
