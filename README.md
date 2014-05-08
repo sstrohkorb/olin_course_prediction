@@ -49,11 +49,13 @@ So, to predict the enrollment of Software Design in the 1415FA semester, we make
 
 We have found that a C value (input to the Logisitc Regression model) of 0.1 achieves reasonable results, although more fine-tuning could be done to find the optimal C value. 
 
-# Our results
+# Our Results
 
 The graph below shows the cumulative error of each model compared with the acutal enrollment for the following semesters: SP11, SP12, FA12, SP13, and FA13. 
 
-![Alt text](/results/model_comparison.png?raw=true "Optional Title")
+![Alt text](/results/model_comparison.png?raw=true "Model Comparison")
+
+The light blue bar represents the Prereg + Course History Predicted Enrollment model, which outperforms the other models, but still does not do as good a job at course prediction as the pre-registration survey as a whole. 
 
 # Data Structures (Models)
 
@@ -70,3 +72,6 @@ There are several objects used to store the data from Olin's Course History in a
   - Professor
 
   - Graduating Class: this was initially designed to include information about the requirements for specific classes, but we didn't end up using it much
+
+# Suggestions for Improvement/Further Work
+
