@@ -37,6 +37,22 @@ To gauge how effective our predictions are, we run through the predictionson 20 
 
 Additionally, we compare each of these models' predicted enrollment with the actual enrollment and the pre-registration survey predicted enrollment. 
 
+# Data Structures (Models)
+
+There are several objects used to store the data from Olin's Course History in an effective way:
+
+  - Student: stores information like gender, starting/ending semesters, list of course offerings taken, and major
+
+  - Course: represents one course, like Software Design
+
+  - Course Offering: represents an offering of a single course, like the Fall 2014 offering of Software Design
+
+  - Major: and concentration
+
+  - Professor
+
+  - Graduating Class: this was initially designed to include information about the requirements for specific classes, but we didn't end up using it much
+
 # Predictive Model
 
 We used scikit learn's Linear Regression model: 
@@ -56,22 +72,6 @@ The graph below shows the cumulative error of each model compared with the acuta
 ![Alt text](/results/model_comparison.png?raw=true "Model Comparison")
 
 The light blue bar represents the Prereg + Course History Predicted Enrollment model, which outperforms the other models, but still does not do as good a job at course prediction as the pre-registration survey as a whole. 
-
-# Data Structures (Models)
-
-There are several objects used to store the data from Olin's Course History in an effective way:
-
-  - Student: stores information like gender, starting/ending semesters, list of course offerings taken, and major
-
-  - Course: represents one course, like Software Design
-
-  - Course Offering: represents an offering of a single course, like the Fall 2014 offering of Software Design
-
-  - Major: and concentration
-
-  - Professor
-
-  - Graduating Class: this was initially designed to include information about the requirements for specific classes, but we didn't end up using it much
 
 # Suggestions for Improvement and Further Work
 
