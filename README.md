@@ -23,7 +23,7 @@ After running olin_course_prediction.py, there will be 2 files in the /results d
 
 ## 5 Models
 
-To gauge how effective our predictions are, we run through the predictions for 5 different models, each having different amounts of feature input data:
+To gauge how effective our predictions are, we run through the predictionson 20 different coures offered consistantly at Olin for 5 different models , each having different amounts of feature input data:
 
   - Baseline Predicted Enrollment: No features, trains on past enrollment trends
 
@@ -48,6 +48,12 @@ Using the linear regression model, we can predict whether or not a student is li
 So, to predict the enrollment of Software Design in the 1415FA semester, we make 4 separate linear regression models, one for each grade of students. These models consider the course histories of all students, noting those who took Software Design in the fall semester of the specified grade as well as the preregistration data for how many students within that grade said that they would take Software Design. The model then predicts for each student at Olin that semester the probability that the student would take Software Design. These probabilities are summed to determine the predicted total enrollment of the course. 
 
 We have found that a C value (input to the Logisitc Regression model) of 0.1 achieves reasonable results, although more fine-tuning could be done to find the optimal C value. 
+
+# Our results
+
+The graph below shows the cumulative error of each model compared with the acutal enrollment for the following semesters: SP11, SP12, FA12, SP13, and FA13. 
+
+![Alt text](/results/model_comparison.png?raw=true "Optional Title")
 
 # Data Structures (Models)
 

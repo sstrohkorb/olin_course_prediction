@@ -126,11 +126,11 @@ if __name__ == '__main__':
     predicting_semesters.append('1415FA')
 
     
-    # course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
-    #                "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
-    #                "ENGR3390", "ENGR3420", "AHSE2110"]
+    course_list = ["SCI1210", "ENGR2210", "SCI1410", "MTH2130", "ENGR2510", "SCI1130", "ENGR2410", "MTH2110", "ENGR3410", 
+                   "ENGR2320", "ENGR2340", "ENGR2350", "ENGR3330", "ENGR2420", "ENGR3220", "ENGR3310", "ENGR3260", 
+                   "ENGR3390", "ENGR3420", "AHSE2110"]
     # course_list = ["SCI1210", "ENGR2210", "SCI1410"]
-    course_list = ["ENGR2210"]
+    # course_list = ["ENGR2210"]
 
     predicted_data = [{} for x in range(number_of_models)]
     for i in range(len(course_list)):
@@ -140,8 +140,6 @@ if __name__ == '__main__':
       for j in range(len(ending_semesters) - 8):
         total_course_enrollments = [0]*number_of_models
         for k in range(7):
-          # print 
-          # print course_list[i], predicting_semesters[j], k
           all_predicted_enrollments_for_one_course = predict_enrollment_for_one_course(students, courses, all_courses_list, course_list[i], k, k+1, ending_semesters[j], ending_semesters[j + 8], predicting_semesters[j], add_dummy_data, number_of_models)
           for x in range(number_of_models):
             total_course_enrollments[x] += all_predicted_enrollments_for_one_course[x]
@@ -153,7 +151,6 @@ if __name__ == '__main__':
         predicted_data[x][course_list[i]] = all_semesters_predicted_enrollments[x]\
 
     model_names, course_names, total_model_errors = calculate_error_for_each_model(course_list, courses, predicting_semesters, predicted_data, True)
-    # make_histograms_for_models(model_names, course_names, total_model_errors)
     make_excel_for_models(model_names, course_names, total_model_errors)
     store_simulation_data(course_list, courses, predicting_semesters, predicted_data)
 
