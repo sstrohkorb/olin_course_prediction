@@ -73,5 +73,18 @@ There are several objects used to store the data from Olin's Course History in a
 
   - Graduating Class: this was initially designed to include information about the requirements for specific classes, but we didn't end up using it much
 
-# Suggestions for Improvement/Further Work
+# Suggestions for Improvement and Further Work
+
+## Improve the signal between the pre-registration data and a student's choice of course
+
+Currently, the pre-registration survey provides data on how many people from each grade are expected to take a particular course. On the other hand, our model predicts what a single student will do, given their history. Even though the pre-registration data is the clearest signal of data we have to predict course enrollment theoretically, the weight of the pre-registration survey feature is not comparatively high in the simulations. 
+
+We suggest either attempting to predict the enrollment for a semester, not for individual students, given the pre-registration data as it currently stand. For the future it would be great if we could link the responses to the pre-registration survey with the students included in Olin's Course History, so we could have the pre-registration survey results for each student.  
+
+
+
+
+
+
+
 
