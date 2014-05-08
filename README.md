@@ -15,7 +15,11 @@ Also, Make sure to specify the locations of the Olin Course History data and Pre
 
 ## Output
 
-After running olin_course_prediction.py, there will be 2 files in the /results directory. test_data.xls contains the course enrollment predictions for the 5 models we're considering to predict course enrollment with one sheet per course. model_comparison.xls is one sheet with the cumulative error of each model compared with the acutal past enrollment of those courses (for the semesters with pre-registration data). 
+After running olin_course_prediction.py, there will be 2 files in the /results directory: 
+
+  - test_data.xls: the course enrollment predictions for the 5 models we're considering to predict course enrollment with one sheet per course
+
+  - model_comparison.xls: one sheet with the cumulative error of each model compared with the acutal past enrollment of those courses (for the semesters with pre-registration data). 
 
 # Predictive Model
 
