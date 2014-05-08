@@ -1,7 +1,7 @@
 Olin Course Prediction
 ======================
 
-An attempt to predict the enrollment of Olin College courses based on preregistration survey data and Olin's course history. 
+A prediction tool for Olin College course enrollment based on preregistration survey data and Olin's course history. 
 
 # Usage
 
@@ -17,9 +17,25 @@ Also, Make sure to specify the locations of the Olin Course History data and Pre
 
 After running olin_course_prediction.py, there will be 2 files in the /results directory: 
 
-  - test_data.xls: the course enrollment predictions for the 5 models we're considering to predict course enrollment with one sheet per course
+  - test_data.xls: the course enrollment predictions for the 5 models (discussed below) we're considering to predict course enrollment with one sheet per course
 
   - model_comparison.xls: one sheet with the cumulative error of each model compared with the acutal past enrollment of those courses (for the semesters with pre-registration data). 
+
+## 5 Models
+
+To gauge how effective our predictions are, we run through the predictions for 5 different models, each having different amounts of feature input data:
+
+  - Baseline Predicted Enrollment: No features, trains on past enrollment trends
+
+  - Gender Feature Enrollment: the baseline predicted enrollment model with the addition of the gender of the sudent added to the feature data
+
+  - Prereg Predicted Enrollment: the gender feature enrollment model with the addition of pre-registration data to the feature data
+
+  - Course History Predicted Enrollment: the gender feature enrollment model with the addition of feature data values (boolean) for every course at Olin as well as the major of the student
+
+  - Prereg + Course History Predicted Enrollment: the combination of all of our predictive strategies; this model *should* be the most effective at predicting course enrollment
+
+Additionally, we compare each of these models' predicted enrollment with the actual enrollment and the pre-registration survey predicted enrollment. 
 
 # Predictive Model
 
