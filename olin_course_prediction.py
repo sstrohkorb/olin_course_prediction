@@ -2,6 +2,13 @@ from controllers import *
 from sklearn import linear_model
 
 def initialize_input_data(enrollment_history_filepath='../course_enrollments_2002-2014spring_anonymized.csv', prereg_data_filepath="../pre_reg_survey_data/*"):
+    """
+    Parse course data to create students, courses, professors, and all_courses_list
+    return values:
+      students: dict mapping student id number to Student object
+      courses: dict mapping course number to Course object
+      all_courses_list: list of tuples (course number, course title)
+    """
     [students, courses, professors] = get_course_data(enrollment_history_filepath)
     prereg_data = get_prereg_data(prereg_data_filepath)
     enter_prereg_data(courses, prereg_data)
@@ -13,6 +20,11 @@ def initialize_input_data(enrollment_history_filepath='../course_enrollments_200
     return students, courses, all_courses_list
 
 def add_dummy_student(x_list, y_list):
+    """
+    Add two dummy students so that y_list will have more than one class.
+    For some reason, some versions of sklearn get mad when you try to fit to 
+    a single class
+    """
     if x_list: 
       dummy_x = [0]*len(x_list[0])
       dummy_x[-1] = 1   # set the dummy feature to 1
@@ -26,6 +38,9 @@ def add_dummy_student(x_list, y_list):
     return x_list, y_list
 
 def make_random_train_test(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data):
+    """
+    randomly assign students to training or testing data sets
+    """
     [x_matrix, y_values] = make_student_feature_data(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
     [x_train, y_train, x_test, y_test] = make_random_training_data(x_matrix, y_values, len(y_values)/2)
     if add_dummy_data: 
@@ -34,6 +49,10 @@ def make_random_train_test(students, courses, all_courses_list, desired_course, 
     return [x_train, y_train, x_test, y_test]
 
 def make_semester_specific_train_test(situation, students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data):
+    """
+    Create training and testing data using "current" students as the test data se and all 
+    past students as trainin data
+    """
     current_students, past_students = get_current_and_past_students(students, ending_semester, current_semester)
     [x_train, y_train] = make_student_feature_data(situation, False, past_students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
     [x_test, y_test] = make_student_feature_data(situation, True, current_students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
@@ -53,6 +72,9 @@ def make_logistic(x_train, y_train, c_value=1e5):
   return logistic
 
 def predict_enrollment_for_one_course(students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data, number_of_models):
+  """
+  predict enrollment for a given course and student semester for each model
+  """
   all_train_test_data = []
   for i in range(number_of_models):
     train_test_data = make_semester_specific_train_test(i, students, courses, all_courses_list, desired_course, current_semester, desired_semester, starting_semester, ending_semester, predicting_for_semester, add_dummy_data)
