@@ -55,7 +55,7 @@ There are several objects used to store the data from Olin's Course History in a
 
 # Predictive Model
 
-We used scikit learn's Linear Regression model: 
+We used scikit learn's Logistic Regression model: 
 
 http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html 
 
