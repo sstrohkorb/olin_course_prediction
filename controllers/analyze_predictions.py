@@ -57,10 +57,9 @@ def calculate_error_for_each_model(course_list, courses, semester_names, sim_dat
     error_for_each_model = [0]*number_of_models
     for j in range(number_of_models + 1): 
       error_for_each_model = 0.0
-      for i in range(num_semesters):
-        smoother = 0.0
-        if actual_enrollment[i] == 0:
-          smoother = 1.0
+      # only calculate for the number of semester we actually have data for (since right now we 
+      # have data for one less semester than we have pre-reg data for)
+      for i in range(num_semesters-1):
         # pre-reg data
         if j == number_of_models:
           if prereg_enrollment[i] == 0:
